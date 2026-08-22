@@ -1,0 +1,23 @@
+{
+  "name": "Big Sur Glow",
+  "author": "MarbleCeo",
+  "description": "Paleta lavanda inspirada no macOS Big Sur, usada pelo tema no Windows e no Linux.",
+  "colors": {
+    "lavender":     "#D6BCFA",
+    "iris":         "#9b87f5",
+    "violet":       "#7E69AB",
+    "indigo":       "#6E59A5",
+    "ink":          "#221F26",
+    "slate":        "#403E43",
+    "mist":         "#E5DEFF",
+    "sky":          "#D3E4FD"
+  },
+  "accent": {
+    "light": "#9b87f5",
+    "dark":  "#D6BCFA"
+  },
+  "wallpaper": {
+    "light": "assets/wallpaper-light.png",
+    "dark":  "assets/wallpaper-dark.png"
+  }
+}
