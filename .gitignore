@@ -10,3 +10,7 @@ Thumbs.db
 *.bak
 *.local
 *.log
+
+# Artefatos do Python
+__pycache__/
+*.pyc

@@ -208,6 +208,7 @@ bigsur-windows-glow/
 ├── linux/
 │   ├── install.sh          # monta o tema e aplica
 │   └── uninstall.sh
+├── tools/check-gtk-css.py  # valida as folhas contra o parser do GTK
 ├── docs/optional-tools.md  # dock, icones, cursores
 └── index.html              # pagina de vitrine (HTML estatico, sem build)
 ```
