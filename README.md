@@ -126,6 +126,20 @@ O libadwaita ignora `~/.themes` por completo, entao a folha do GTK 4 tambem e
 copiada para `~/.config/gtk-4.0/gtk.css`. O `uninstall.sh` devolve o arquivo
 anterior se voce ja tinha um.
 
+#### Validando o CSS
+
+O CSS do GTK e um subconjunto do CSS da web, e o parser dele descarta em
+silencio o que nao entende: `width`, `line-height`, `calc()`, `color-mix()` e
+`:focus-visible` no GTK 3 sao os tropecos classicos. Antes de mexer nas
+folhas, rode:
+
+```bash
+python tools/check-gtk-css.py
+```
+
+Ele confere chaves, propriedades, pseudo-classes e funcoes contra o que o GTK
+aceita de fato, e sai com codigo 1 se achar problema.
+
 ---
 
 ## Sempre da pra voltar atras

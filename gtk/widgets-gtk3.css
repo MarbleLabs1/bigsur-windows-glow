@@ -187,7 +187,7 @@ button:disabled {
   color: @bsg_fg_disabled;
   box-shadow: none;
 }
-button:focus-visible { outline: 2px solid alpha(@bsg_accent, 0.55); outline-offset: 1px; }
+button:focus { outline: 2px solid alpha(@bsg_accent, 0.55); outline-offset: 1px; }
 
 button.suggested-action {
   background-image: linear-gradient(to bottom, @bsg_accent, @bsg_accent_hover);
@@ -243,7 +243,7 @@ spinbutton:not(.vertical) {
   transition: border-color 130ms ease, box-shadow 130ms ease;
 }
 entry:focus,
-spinbutton:not(.vertical):focus-within {
+spinbutton:not(.vertical):focus {
   border-color: @bsg_accent;
   box-shadow: 0 0 0 3px alpha(@bsg_accent, 0.28), inset 0 1px 2px alpha(#000000, 0.05);
 }
@@ -332,7 +332,9 @@ radio:checked        { -gtk-icon-source: -gtk-icontheme("radio-symbolic"); }
 radio:indeterminate  { -gtk-icon-source: -gtk-icontheme("list-remove-symbolic"); }
 
 check:disabled, radio:disabled { background-image: none; background-color: alpha(@bsg_trough, 0.5); border-color: @bsg_separator; color: @bsg_fg_disabled; }
-check:focus-visible, radio:focus-visible { outline: 2px solid alpha(@bsg_accent, 0.5); outline-offset: 2px; }
+checkbutton:focus > check,
+radiobutton:focus > radio,
+check:focus, radio:focus { outline: 2px solid alpha(@bsg_accent, 0.5); outline-offset: 2px; }
 
 /* dentro de listas e menus o fundo some */
 menuitem check, menuitem radio,
