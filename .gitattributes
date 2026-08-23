@@ -1,0 +1,13 @@
+# Scripts de shell PRECISAM de LF: com CRLF o Linux falha com
+# "bad interpreter: /usr/bin/env bash^M". Nao deixe o autocrlf estragar isso.
+*.sh        text eol=lf
+*.css       text eol=lf
+*.json      text eol=lf
+*.md        text eol=lf
+*.html      text eol=lf
+
+# PowerShell roda no Windows; CRLF e o certo la.
+*.ps1       text eol=crlf
+
+*.png       binary
+*.ico       binary

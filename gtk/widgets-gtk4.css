@@ -1,0 +1,426 @@
+/* ==========================================================================
+ * Big Sur Glow — folha de widgets GTK 4 / libadwaita
+ *
+ * O libadwaita nao aceita temas do jeito que o GTK 3 aceita: ele so respeita
+ * um punhado de cores nomeadas mais o CSS do usuario. Por isso este arquivo
+ * (a) redefine as cores nomeadas do libadwaita a partir da nossa paleta e
+ * (b) reescreve os widgets que dao a cara do Big Sur.
+ *
+ * Como no GTK 3, nao ha cor literal aqui: o instalador concatena
+ * colors-light.css ou colors-dark.css na frente.
+ *
+ * Autor: MarbleCeo
+ * ========================================================================== */
+
+/* --------------------------------------------------------------------------
+ * 1. Cores nomeadas do libadwaita
+ * ------------------------------------------------------------------------ */
+
+@define-color accent_color        @bsg_accent_active;
+@define-color accent_bg_color     @bsg_accent;
+@define-color accent_fg_color     @bsg_accent_fg;
+
+@define-color destructive_color    @bsg_error;
+@define-color destructive_bg_color @bsg_error;
+@define-color destructive_fg_color #ffffff;
+
+@define-color success_color     @bsg_success;
+@define-color success_bg_color  @bsg_success;
+@define-color success_fg_color  #ffffff;
+@define-color warning_color     @bsg_warning;
+@define-color warning_bg_color  @bsg_warning;
+@define-color warning_fg_color  #1d1a24;
+@define-color error_color       @bsg_error;
+@define-color error_bg_color    @bsg_error;
+@define-color error_fg_color    #ffffff;
+
+@define-color window_bg_color  @bsg_window_bg;
+@define-color window_fg_color  @bsg_fg;
+@define-color view_bg_color    @bsg_view_bg;
+@define-color view_fg_color    @bsg_view_fg;
+
+@define-color headerbar_bg_color       @bsg_headerbar_top;
+@define-color headerbar_fg_color       @bsg_fg;
+@define-color headerbar_border_color   @bsg_headerbar_border;
+@define-color headerbar_backdrop_color @bsg_headerbar_backdrop;
+@define-color headerbar_shade_color    @bsg_headerbar_border;
+
+@define-color card_bg_color     @bsg_card_bg;
+@define-color card_fg_color     @bsg_fg;
+@define-color card_shade_color  @bsg_separator;
+
+@define-color dialog_bg_color   @bsg_popover_bg;
+@define-color dialog_fg_color   @bsg_fg;
+@define-color popover_bg_color  @bsg_popover_bg;
+@define-color popover_fg_color  @bsg_fg;
+@define-color popover_shade_color @bsg_shadow;
+
+@define-color sidebar_bg_color       @bsg_sidebar_bg;
+@define-color sidebar_fg_color       @bsg_fg;
+@define-color sidebar_backdrop_color @bsg_sidebar_bg;
+@define-color sidebar_shade_color    @bsg_separator;
+
+@define-color secondary_sidebar_bg_color @bsg_sidebar_bg;
+@define-color secondary_sidebar_fg_color @bsg_fg;
+
+@define-color thumbnail_bg_color @bsg_card_bg;
+@define-color thumbnail_fg_color @bsg_fg;
+
+@define-color shade_color             @bsg_shadow_backdrop;
+@define-color scrollbar_outline_color alpha(@bsg_view_bg, 0.6);
+
+/* --------------------------------------------------------------------------
+ * 2. Janela e decoracao
+ * ------------------------------------------------------------------------ */
+
+window.csd,
+window.background { border-radius: 12px; }
+
+window.csd:not(.popup):not(.tooltip):not(.messagedialog) {
+  box-shadow:
+    0 0 0 1px @bsg_border_strong,
+    0 14px 38px 4px @bsg_shadow,
+    0 4px 10px 0 alpha(@bsg_shadow, 0.55);
+}
+window.csd:backdrop {
+  box-shadow:
+    0 0 0 1px @bsg_separator,
+    0 6px 18px 2px @bsg_shadow_backdrop;
+}
+window.maximized, window.fullscreen, window.tiled { border-radius: 0; box-shadow: none; }
+
+/* --------------------------------------------------------------------------
+ * 3. Barra de titulo
+ * ------------------------------------------------------------------------ */
+
+headerbar > windowhandle {
+  background-image: linear-gradient(to bottom, @bsg_headerbar_top, @bsg_headerbar_bottom);
+  box-shadow: inset 0 1px @bsg_headerbar_gloss, inset 0 -1px @bsg_headerbar_border;
+  color: @bsg_fg;
+}
+headerbar { min-height: 46px; padding: 0 7px; background: none; box-shadow: none; }
+headerbar:backdrop > windowhandle {
+  background-image: linear-gradient(to bottom, @bsg_headerbar_backdrop, @bsg_headerbar_backdrop);
+  box-shadow: inset 0 -1px @bsg_headerbar_border;
+  color: @bsg_fg_dim;
+}
+headerbar .title { font-weight: 600; font-size: 0.94em; }
+headerbar .subtitle { font-size: 0.82em; color: @bsg_fg_dim; }
+
+headerbar button:not(.close):not(.minimize):not(.maximize),
+headerbar menubutton > button {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: @bsg_fg;
+}
+headerbar button:not(.close):not(.minimize):not(.maximize):hover { background-color: alpha(@bsg_fg, 0.09); }
+headerbar button:not(.close):not(.minimize):not(.maximize):checked { background-color: alpha(@bsg_fg, 0.16); }
+
+/* --------------------------------------------------------------------------
+ * 4. Semaforo
+ *
+ * No GTK 4 os controles ficam em windowcontrols e o glifo e um <image>
+ * separado — por isso a cor some no image, nao no button.
+ * ------------------------------------------------------------------------ */
+
+windowcontrols { margin: 0; }
+windowcontrols > button {
+  min-width: 12px;
+  min-height: 12px;
+  margin: 0 4px;
+  padding: 0;
+  border: 1px solid alpha(#000000, 0.10);
+  border-radius: 50%;
+  background-image: none;
+  box-shadow: none;
+  transition: background-color 140ms ease;
+}
+windowcontrols > button:first-child { margin-left: 6px; }
+windowcontrols > button > image {
+  min-width: 12px;
+  min-height: 12px;
+  padding: 0;
+  background: none;
+  color: transparent;
+  transition: color 140ms ease;
+}
+windowcontrols > button.close    { background-color: @bsg_tl_close; }
+windowcontrols > button.minimize { background-color: @bsg_tl_minimize; }
+windowcontrols > button.maximize { background-color: @bsg_tl_maximize; }
+
+headerbar:hover windowcontrols > button > image { color: @bsg_tl_glyph; }
+windowcontrols > button:hover { background-image: linear-gradient(to bottom, alpha(#ffffff, 0.16), transparent); }
+windowcontrols > button:active { background-image: linear-gradient(to bottom, alpha(#000000, 0.18), alpha(#000000, 0.18)); }
+
+headerbar:backdrop windowcontrols > button {
+  background-color: @bsg_tl_backdrop;
+  border-color: transparent;
+}
+headerbar:backdrop windowcontrols > button > image { color: transparent; }
+
+/* --------------------------------------------------------------------------
+ * 5. Botoes
+ * ------------------------------------------------------------------------ */
+
+button {
+  min-height: 24px;
+  padding: 5px 13px;
+  border: 1px solid @bsg_button_border;
+  border-radius: 6px;
+  background-image: linear-gradient(to bottom, @bsg_button_top, @bsg_button_bottom);
+  box-shadow: 0 1px 2px alpha(#000000, 0.07), inset 0 1px @bsg_button_gloss;
+  color: @bsg_fg;
+  font-weight: 500;
+  transition: background-image 130ms ease, box-shadow 130ms ease;
+}
+button:hover { background-image: linear-gradient(to bottom, @bsg_button_hover, @bsg_button_top); }
+button:active, button:checked {
+  background-image: linear-gradient(to bottom, @bsg_button_active, @bsg_button_active);
+  box-shadow: inset 0 1px 3px alpha(#000000, 0.16);
+}
+button:disabled { background-image: none; background-color: alpha(@bsg_button_bottom, 0.55); color: @bsg_fg_disabled; box-shadow: none; }
+
+button.suggested-action {
+  background-image: linear-gradient(to bottom, @bsg_accent, @bsg_accent_hover);
+  border-color: @bsg_accent_active;
+  color: @bsg_accent_fg;
+}
+button.destructive-action {
+  background-image: linear-gradient(to bottom, @bsg_error, shade(@bsg_error, 0.92));
+  border-color: shade(@bsg_error, 0.82);
+  color: #ffffff;
+}
+button.flat { background-image: none; background-color: transparent; border-color: transparent; box-shadow: none; }
+button.flat:hover { background-color: alpha(@bsg_fg, 0.09); }
+button.flat:active, button.flat:checked { background-color: alpha(@bsg_fg, 0.16); }
+button.circular { border-radius: 50%; min-width: 28px; min-height: 28px; padding: 0; }
+button.pill { border-radius: 14px; padding: 7px 20px; }
+
+/* --------------------------------------------------------------------------
+ * 6. Campos
+ * ------------------------------------------------------------------------ */
+
+entry, spinbutton:not(.vertical) {
+  min-height: 28px;
+  padding: 4px 10px;
+  border: 1px solid @bsg_entry_border;
+  border-radius: 6px;
+  background-color: @bsg_view_bg;
+  background-image: none;
+  box-shadow: inset 0 1px 2px alpha(#000000, 0.07);
+  color: @bsg_view_fg;
+}
+entry:focus-within {
+  border-color: @bsg_accent;
+  box-shadow: 0 0 0 3px alpha(@bsg_accent, 0.28);
+}
+entry.search { border-radius: 14px; }
+
+/* linhas de preferencia (AdwEntryRow etc.) */
+row.entry, .entry-row { background-color: @bsg_card_bg; }
+
+/* --------------------------------------------------------------------------
+ * 7. Interruptor, caixa, radio, deslizante
+ * ------------------------------------------------------------------------ */
+
+switch {
+  min-width: 46px;
+  min-height: 26px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background-color: @bsg_switch_off;
+  background-image: none;
+  box-shadow: inset 0 1px 2px alpha(#000000, 0.10);
+}
+switch:checked { background-color: @bsg_accent; border-color: alpha(@bsg_accent_active, 0.5); }
+switch > slider {
+  min-width: 22px;
+  min-height: 22px;
+  margin: 1px;
+  border: none;
+  border-radius: 50%;
+  background-image: linear-gradient(to bottom, @bsg_knob_top, @bsg_knob_bottom);
+  box-shadow: 0 1px 3px alpha(#000000, 0.28);
+}
+
+checkbutton > check, radio, check {
+  min-width: 16px;
+  min-height: 16px;
+  border: 1px solid @bsg_entry_border;
+  border-radius: 4px;
+  background-image: linear-gradient(to bottom, @bsg_button_top, @bsg_button_bottom);
+  box-shadow: inset 0 1px alpha(#ffffff, 0.5);
+  color: @bsg_accent_fg;
+}
+radio { border-radius: 50%; }
+check:checked, check:indeterminate, radio:checked, radio:indeterminate {
+  background-image: linear-gradient(to bottom, @bsg_accent, @bsg_accent_hover);
+  border-color: @bsg_accent_active;
+}
+
+scale > trough {
+  min-height: 4px;
+  min-width: 4px;
+  border: none;
+  border-radius: 3px;
+  background-color: @bsg_trough;
+}
+scale > trough > highlight {
+  border-radius: 3px;
+  background-image: linear-gradient(to right, @bsg_accent_active, @bsg_accent);
+}
+scale > trough > slider {
+  min-width: 18px;
+  min-height: 18px;
+  margin: -8px;
+  border: 1px solid alpha(#000000, 0.14);
+  border-radius: 50%;
+  background-image: linear-gradient(to bottom, @bsg_knob_top, @bsg_knob_bottom);
+  box-shadow: 0 1px 3px alpha(#000000, 0.24);
+}
+
+/* --------------------------------------------------------------------------
+ * 8. Rolagem
+ * ------------------------------------------------------------------------ */
+
+scrollbar { background: none; border: none; }
+scrollbar > range > trough { background: none; border: none; }
+scrollbar > range > trough > slider {
+  min-width: 8px;
+  min-height: 8px;
+  margin: 3px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background-clip: padding-box;
+  background-color: @bsg_scroll;
+}
+scrollbar > range > trough > slider:hover { background-color: @bsg_scroll_hover; }
+
+/* --------------------------------------------------------------------------
+ * 9. Popovers, menus, listas
+ * ------------------------------------------------------------------------ */
+
+popover > contents {
+  padding: 5px;
+  border: 1px solid @bsg_border;
+  border-radius: 12px;
+  background-color: @bsg_popover_bg;
+  box-shadow: 0 10px 30px @bsg_shadow, 0 2px 6px alpha(#000000, 0.14);
+  color: @bsg_fg;
+}
+popover > arrow { background-color: @bsg_popover_bg; border-color: @bsg_border; }
+popover.menu > contents { padding: 4px; }
+popover.menu modelbutton {
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: none;
+}
+popover.menu modelbutton:hover { background-color: @bsg_accent; color: @bsg_accent_fg; }
+
+listview, columnview { background-color: @bsg_view_bg; color: @bsg_view_fg; }
+listview > row, columnview > listview > row {
+  min-height: 30px;
+  border-radius: 6px;
+  margin: 1px 4px;
+  transition: background-color 120ms ease;
+}
+listview > row:hover { background-color: alpha(@bsg_fg, 0.06); }
+listview > row:selected, columnview > listview > row:selected {
+  background-color: @bsg_accent;
+  color: @bsg_accent_fg;
+}
+
+.navigation-sidebar {
+  background-color: @bsg_sidebar_bg;
+  color: @bsg_fg;
+  padding: 4px 0;
+}
+.navigation-sidebar > row {
+  min-height: 30px;
+  margin: 1px 6px;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.navigation-sidebar > row:hover { background-color: alpha(@bsg_fg, 0.07); }
+.navigation-sidebar > row:selected {
+  background-color: @bsg_accent;
+  color: @bsg_accent_fg;
+  font-weight: 500;
+}
+
+/* cartoes de preferencias */
+.card, .boxed-list, list.boxed-list {
+  border: 1px solid @bsg_border;
+  border-radius: 10px;
+  background-color: @bsg_card_bg;
+  box-shadow: 0 1px 2px alpha(#000000, 0.05);
+}
+.boxed-list > row { background: none; }
+.boxed-list > row:not(:last-child) { box-shadow: inset 0 -1px @bsg_separator; }
+
+/* --------------------------------------------------------------------------
+ * 10. Abas (AdwTabBar / AdwViewSwitcher)
+ * ------------------------------------------------------------------------ */
+
+tabbar .box { background-color: @bsg_tabs_bg; box-shadow: inset 0 -1px @bsg_separator; }
+tabbar tabbox > tabboxchild { margin: 4px 2px; }
+tab {
+  min-height: 28px;
+  padding: 3px 12px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: @bsg_fg_dim;
+  font-weight: 500;
+}
+tab:hover { background-color: alpha(@bsg_fg, 0.07); color: @bsg_fg; }
+tab:checked, tab:selected {
+  background-color: @bsg_tab_active;
+  color: @bsg_fg;
+  box-shadow: 0 1px 2px alpha(#000000, 0.14);
+}
+
+viewswitcher button {
+  border-radius: 6px;
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: @bsg_fg_dim;
+}
+viewswitcher button:checked { background-color: @bsg_tab_active; color: @bsg_fg; box-shadow: 0 1px 2px alpha(#000000, 0.14); }
+
+/* --------------------------------------------------------------------------
+ * 11. Miudezas
+ * ------------------------------------------------------------------------ */
+
+progressbar > trough { min-height: 5px; border-radius: 3px; background-color: @bsg_trough; border: none; }
+progressbar > trough > progress { border-radius: 3px; background-image: linear-gradient(to right, @bsg_accent_active, @bsg_accent); }
+
+separator { background-color: @bsg_separator; min-width: 1px; min-height: 1px; }
+
+tooltip {
+  background-color: @bsg_tooltip_bg;
+  border-radius: 8px;
+  color: @bsg_tooltip_fg;
+  box-shadow: 0 4px 14px alpha(#000000, 0.28);
+}
+
+banner > revealer > widget {
+  background-color: alpha(@bsg_accent, 0.16);
+  color: @bsg_fg;
+  box-shadow: inset 0 -1px @bsg_separator;
+}
+
+toastoverlay > toast {
+  background-color: @bsg_osd_bg;
+  border-radius: 12px;
+  color: #F2F0F7;
+  box-shadow: 0 6px 20px alpha(#000000, 0.35);
+}
+
+statuspage .icon { color: @bsg_fg_dim; }
+spinner { color: @bsg_accent; }
+
+selection, ::selection { background-color: @bsg_accent; color: @bsg_accent_fg; }

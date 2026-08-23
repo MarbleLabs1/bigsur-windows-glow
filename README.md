@@ -16,12 +16,24 @@ Projeto irmao do [macos-theme-for-linux](https://github.com/MarbleCeo/macos-them
 
 ## O que ele faz
 
-- Modo claro e escuro, com uma paleta lavanda propria
-- Cor de destaque do sistema aplicada em janelas, botoes e selecao
-- Transparencia das janelas ligada
-- Papel de parede em gradiente (arte original, gerada por codigo)
-- Barra de tarefas centralizada, sem widgets e sem caixa de busca (Windows 11)
-- No Linux, integra com o tema GTK WhiteSur quando ele estiver instalado
+**No Linux — um tema GTK proprio**, escrito neste repositorio. Nao depende de
+WhiteSur nem de nenhum outro tema de terceiros:
+
+- **GTK 3 e GTK 4/libadwaita**, claro e escuro, montados a partir da mesma
+  folha de regras
+- **Semaforo**: os tres circulos coloridos a esquerda da barra de titulo, com
+  os glifos aparecendo so quando o ponteiro entra na barra
+- Cantos de janela arredondados e sombra difusa
+- Botoes, campos, interruptores, caixas, radios e deslizantes redesenhados
+- Popovers e menus com canto de 12px e item em pilula
+- Abas no desenho do *segmented control*
+- Barra lateral e listas com linha selecionada arredondada
+- Barra de rolagem fina e flutuante, que engorda com o ponteiro perto
+
+**No Windows** — ajustes de aparencia da conta: modo claro/escuro, cor de
+destaque, transparencia, papel de parede e barra de tarefas.
+
+**Nos dois** — papel de parede em gradiente (arte original, gerada por codigo).
 
 ## O que ele **nao** faz
 
@@ -29,9 +41,15 @@ Este instalador altera **somente configuracoes de aparencia da sua conta de
 usuario**. Ele nao pede administrador, nao baixa nada da internet e nao toca em
 arquivo de sistema.
 
-Cantos arredondados, dock e pacotes de icones dependem de programas de
-terceiros, listados em [docs/optional-tools.md](docs/optional-tools.md) para
-voce instalar por conta propria, se quiser.
+**Icones e cursores nao fazem parte deste tema.** Sao milhares de SVGs e um
+pipeline de xcursor — trabalho de outra ordem de grandeza, e ha conjuntos
+prontos e bons. Dock e pacotes de icones estao listados em
+[docs/optional-tools.md](docs/optional-tools.md).
+
+**No Windows nao ha tema de janela.** A aparencia das bordas vem de um arquivo
+`.msstyles`, que e recurso binario compilado — nao da para escrever em texto, e
+exige um patcher para aceitar estilo nao assinado. O que esta aqui e um
+configurador honesto, nao um tema de janela.
 
 ---
 
@@ -79,6 +97,8 @@ Opcoes:
 |---|---|
 | `--dark` | Variante escura |
 | `--no-wallpaper` | Mantem o papel de parede atual |
+| `--no-gtk4` | Nao mexe em `~/.config/gtk-4.0` |
+| `--buttons-right` | Mantem os botoes a direita, sem o semaforo |
 
 Para desfazer:
 
@@ -87,6 +107,24 @@ Para desfazer:
 ```
 
 Ambientes suportados: GNOME, Cinnamon, MATE, XFCE e KDE Plasma.
+
+#### Como o tema e montado
+
+Nao ha passo de build e nao ha CSS duplicado. O `install.sh` concatena o bloco
+de cores da variante escolhida com a folha de widgets:
+
+```
+gtk/colors-dark.css  +  gtk/widgets-gtk3.css  ->  ~/.themes/BigSur-Glow-Dark/gtk-3.0/gtk.css
+gtk/colors-dark.css  +  gtk/widgets-gtk4.css  ->  ~/.themes/BigSur-Glow-Dark/gtk-4.0/gtk.css
+```
+
+A folha de widgets nao contem **nenhuma cor literal** — so referencias a
+`@define-color`. Trocar a paleta e trocar um arquivo de 120 linhas; as 191
+regras do GTK 3 e as 84 do GTK 4 continuam iguais.
+
+O libadwaita ignora `~/.themes` por completo, entao a folha do GTK 4 tambem e
+copiada para `~/.config/gtk-4.0/gtk.css`. O `uninstall.sh` devolve o arquivo
+anterior se voce ja tinha um.
 
 ---
 
@@ -124,14 +162,15 @@ Windows e Linux.
 
 ---
 
-## Pagina de demonstracao
+## Pagina de vitrine
 
-O repositorio inclui uma pagina web (Vite + React + Tailwind) que mostra a
-paleta e os comandos de instalacao:
+O repositorio inclui uma pagina estatica que mostra a paleta, os papeis de
+parede e os comandos de instalacao. Sem build e sem dependencias: abra o
+arquivo direto no navegador.
 
 ```bash
-npm install
-npm run dev
+start index.html      # Windows
+xdg-open index.html   # Linux
 ```
 
 Ela e apenas vitrine. O tema em si sao os scripts em `windows/` e `linux/`.
@@ -142,16 +181,21 @@ Ela e apenas vitrine. O tema em si sao os scripts em `windows/` e `linux/`.
 
 ```
 bigsur-windows-glow/
+├── gtk/                    # o tema em si
+│   ├── colors-light.css    #   so @define-color, variante clara
+│   ├── colors-dark.css     #   so @define-color, variante escura
+│   ├── widgets-gtk3.css    #   191 regras, nenhuma cor literal
+│   └── widgets-gtk4.css    #   84 regras + cores nomeadas do libadwaita
 ├── shared/palette.json     # paleta compartilhada pelos dois sistemas
 ├── assets/                 # papeis de parede (gradientes gerados por codigo)
 ├── windows/
 │   ├── install.ps1
 │   └── uninstall.ps1
 ├── linux/
-│   ├── install.sh
+│   ├── install.sh          # monta o tema e aplica
 │   └── uninstall.sh
-├── docs/optional-tools.md  # dock, icones, cantos arredondados
-└── src/                    # pagina de demonstracao (Vite + React)
+├── docs/optional-tools.md  # dock, icones, cursores
+└── index.html              # pagina de vitrine (HTML estatico, sem build)
 ```
 
 ---

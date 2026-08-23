@@ -1,0 +1,715 @@
+/* ==========================================================================
+ * Big Sur Glow — folha de widgets GTK 3
+ *
+ * Nao contem nenhuma cor literal: tudo vem do bloco @define-color que o
+ * instalador concatena na frente deste arquivo (colors-light.css ou
+ * colors-dark.css). Assim as duas variantes compartilham uma unica regra.
+ *
+ * Autor: MarbleCeo
+ * ========================================================================== */
+
+* {
+  outline-color: alpha(@bsg_accent, 0.55);
+  outline-style: dashed;
+  outline-offset: -3px;
+  outline-width: 1px;
+  -gtk-outline-radius: 6px;
+  -GtkScrolledWindow-scrollbar-spacing: 0;
+  -GtkWidget-focus-line-width: 0;
+  -GtkWidget-focus-padding: 0;
+  -GtkNotebook-initial-gap: 0;
+}
+
+/* ==========================================================================
+ * 1. Janela e decoracao
+ *
+ * O canto arredondado grande e a sombra difusa sao a assinatura mais
+ * reconhecivel do Big Sur — mais do que qualquer cor.
+ * ========================================================================== */
+
+window { background-color: @bsg_window_bg; color: @bsg_fg; }
+
+decoration {
+  border-radius: 12px 12px 0 0;
+  box-shadow:
+    0 0 0 1px @bsg_border_strong,
+    0 14px 38px 4px @bsg_shadow,
+    0 4px 10px 0 alpha(@bsg_shadow, 0.55);
+  margin: 6px;
+}
+decoration:backdrop {
+  box-shadow:
+    0 0 0 1px @bsg_separator,
+    0 6px 18px 2px @bsg_shadow_backdrop;
+}
+.maximized decoration,
+.fullscreen decoration,
+.tiled decoration,
+.solid-csd decoration { border-radius: 0; margin: 0; box-shadow: none; }
+
+.solid-csd headerbar { border-radius: 0; }
+
+/* dialogos e popups nao levam a sombra pesada da janela principal */
+.csd popup decoration { border-radius: 12px; box-shadow: 0 6px 22px @bsg_shadow; }
+messagedialog.csd decoration { border-radius: 14px; }
+tooltip.csd decoration { border-radius: 8px; box-shadow: none; }
+
+/* ==========================================================================
+ * 2. Barra de titulo
+ * ========================================================================== */
+
+headerbar,
+.titlebar:not(headerbar) {
+  min-height: 46px;
+  padding: 0 7px;
+  border-bottom: 1px solid @bsg_headerbar_border;
+  border-radius: 12px 12px 0 0;
+  background-image: linear-gradient(to bottom, @bsg_headerbar_top, @bsg_headerbar_bottom);
+  box-shadow: inset 0 1px @bsg_headerbar_gloss;
+  color: @bsg_fg;
+  transition: background-image 180ms ease, color 180ms ease;
+}
+headerbar:backdrop,
+.titlebar:not(headerbar):backdrop {
+  background-image: linear-gradient(to bottom, @bsg_headerbar_backdrop, @bsg_headerbar_backdrop);
+  box-shadow: none;
+  color: @bsg_fg_dim;
+}
+
+headerbar .title {
+  font-weight: 600;
+  font-size: 0.94em;
+  padding: 0 12px;
+  color: @bsg_fg;
+}
+headerbar:backdrop .title { color: @bsg_fg_dim; }
+headerbar .subtitle { font-size: 0.82em; color: @bsg_fg_dim; padding: 0 12px; }
+
+/* barra dupla (janela dividida) */
+headerbar.default-decoration { min-height: 40px; }
+.titlebar:not(headerbar) > separator { background-color: @bsg_headerbar_border; }
+
+/* botoes dentro da barra ficam discretos ate o mouse chegar */
+headerbar button:not(.titlebutton),
+headerbar menubutton > button {
+  background-image: none;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: @bsg_fg;
+}
+headerbar button:not(.titlebutton):hover,
+headerbar menubutton > button:hover {
+  background-color: alpha(@bsg_fg, 0.09);
+}
+headerbar button:not(.titlebutton):active,
+headerbar button:not(.titlebutton):checked,
+headerbar menubutton > button:checked {
+  background-color: alpha(@bsg_fg, 0.16);
+}
+headerbar button:not(.titlebutton):disabled { color: @bsg_fg_disabled; }
+headerbar button.suggested-action:not(.titlebutton) {
+  background-image: linear-gradient(to bottom, @bsg_accent, @bsg_accent_hover);
+  color: @bsg_accent_fg;
+  border-color: @bsg_accent_active;
+}
+
+/* ==========================================================================
+ * 3. Semaforo
+ *
+ * Os tres circulos coloridos a esquerda. O glifo (x, -, +) so aparece quando
+ * o ponteiro entra na barra — exatamente como no macOS.
+ * ========================================================================== */
+
+headerbar .titlebutton,
+.titlebar .titlebutton {
+  min-width: 12px;
+  min-height: 12px;
+  margin: 0 4px;
+  padding: 0;
+  border: 1px solid alpha(#000000, 0.10);
+  border-radius: 50%;
+  background-image: none;
+  box-shadow: none;
+  color: transparent;
+  -gtk-icon-shadow: none;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+headerbar .titlebutton:first-child { margin-left: 6px; }
+
+headerbar .titlebutton.close    { background-color: @bsg_tl_close; }
+headerbar .titlebutton.minimize { background-color: @bsg_tl_minimize; }
+headerbar .titlebutton.maximize { background-color: @bsg_tl_maximize; }
+
+/* revelar os glifos ao passar o mouse por qualquer ponto da barra */
+headerbar:hover .titlebutton,
+.titlebar:hover .titlebutton { color: @bsg_tl_glyph; }
+
+headerbar .titlebutton:hover    { background-image: linear-gradient(to bottom, alpha(#ffffff, 0.16), transparent); }
+headerbar .titlebutton:active   { background-image: linear-gradient(to bottom, alpha(#000000, 0.18), alpha(#000000, 0.18)); }
+
+/* sem foco os tres ficam cinza, como no macOS */
+headerbar:backdrop .titlebutton,
+.titlebar:backdrop .titlebutton {
+  background-color: @bsg_tl_backdrop;
+  color: transparent;
+  border-color: transparent;
+}
+
+/* ==========================================================================
+ * 4. Botoes
+ * ========================================================================== */
+
+button {
+  min-height: 22px;
+  min-width: 18px;
+  padding: 5px 13px;
+  border: 1px solid @bsg_button_border;
+  border-radius: 6px;
+  background-image: linear-gradient(to bottom, @bsg_button_top, @bsg_button_bottom);
+  box-shadow: 0 1px 2px alpha(#000000, 0.07), inset 0 1px @bsg_button_gloss;
+  color: @bsg_fg;
+  font-weight: 500;
+  transition: background-image 130ms ease, box-shadow 130ms ease, border-color 130ms ease;
+}
+button:hover {
+  background-image: linear-gradient(to bottom, @bsg_button_hover, @bsg_button_top);
+  box-shadow: 0 2px 4px alpha(#000000, 0.10), inset 0 1px @bsg_button_gloss;
+}
+button:active,
+button:checked {
+  background-image: linear-gradient(to bottom, @bsg_button_active, @bsg_button_active);
+  box-shadow: inset 0 1px 3px alpha(#000000, 0.16);
+}
+button:disabled {
+  background-image: none;
+  background-color: alpha(@bsg_button_bottom, 0.55);
+  color: @bsg_fg_disabled;
+  box-shadow: none;
+}
+button:focus-visible { outline: 2px solid alpha(@bsg_accent, 0.55); outline-offset: 1px; }
+
+button.suggested-action {
+  background-image: linear-gradient(to bottom, @bsg_accent, @bsg_accent_hover);
+  border-color: @bsg_accent_active;
+  color: @bsg_accent_fg;
+  box-shadow: 0 1px 2px alpha(@bsg_accent_active, 0.35), inset 0 1px alpha(#ffffff, 0.28);
+}
+button.suggested-action:hover { background-image: linear-gradient(to bottom, @bsg_accent_hover, @bsg_accent_active); }
+button.suggested-action:active { background-image: linear-gradient(to bottom, @bsg_accent_active, @bsg_accent_active); }
+button.suggested-action:disabled { background-image: none; background-color: alpha(@bsg_accent, 0.35); color: alpha(@bsg_accent_fg, 0.6); }
+
+button.destructive-action {
+  background-image: linear-gradient(to bottom, @bsg_error, shade(@bsg_error, 0.92));
+  border-color: shade(@bsg_error, 0.82);
+  color: #ffffff;
+}
+button.destructive-action:hover { background-image: linear-gradient(to bottom, shade(@bsg_error, 1.06), @bsg_error); }
+
+button.flat,
+button.text-button.flat,
+button.image-button.flat {
+  background-image: none;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+button.flat:hover { background-color: alpha(@bsg_fg, 0.09); }
+button.flat:active, button.flat:checked { background-color: alpha(@bsg_fg, 0.16); }
+
+button.circular { border-radius: 50%; padding: 6px; min-width: 26px; min-height: 26px; }
+
+/* grupo de botoes: cantos so nas pontas, como o segmented control do macOS */
+.linked > button:not(:first-child):not(:last-child) { border-radius: 0; }
+.linked > button:first-child { border-radius: 6px 0 0 6px; }
+.linked > button:last-child { border-radius: 0 6px 6px 0; }
+.linked > button:not(:first-child) { border-left-width: 0; }
+
+/* ==========================================================================
+ * 5. Campos de texto
+ * ========================================================================== */
+
+entry,
+spinbutton:not(.vertical) {
+  min-height: 26px;
+  padding: 4px 10px;
+  border: 1px solid @bsg_entry_border;
+  border-radius: 6px;
+  background-color: @bsg_view_bg;
+  background-image: none;
+  box-shadow: inset 0 1px 2px alpha(#000000, 0.07);
+  color: @bsg_view_fg;
+  caret-color: @bsg_accent;
+  transition: border-color 130ms ease, box-shadow 130ms ease;
+}
+entry:focus,
+spinbutton:not(.vertical):focus-within {
+  border-color: @bsg_accent;
+  box-shadow: 0 0 0 3px alpha(@bsg_accent, 0.28), inset 0 1px 2px alpha(#000000, 0.05);
+}
+entry:disabled { color: @bsg_fg_disabled; background-color: alpha(@bsg_view_bg, 0.55); box-shadow: none; }
+entry:selected, entry selection { background-color: @bsg_accent; color: @bsg_accent_fg; }
+entry.error { border-color: @bsg_error; }
+entry.error:focus { box-shadow: 0 0 0 3px alpha(@bsg_error, 0.26); }
+entry.warning { border-color: @bsg_warning; }
+entry image { color: @bsg_fg_dim; }
+entry progress { border-bottom: 2px solid @bsg_accent; background-image: none; background-color: transparent; }
+
+/* campo de busca vira pilula */
+entry.search { border-radius: 13px; padding-left: 12px; padding-right: 12px; }
+
+spinbutton:not(.vertical) button {
+  background-image: none;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: @bsg_fg_dim;
+  min-width: 20px;
+  border-radius: 5px;
+}
+spinbutton:not(.vertical) button:hover { background-color: alpha(@bsg_fg, 0.10); color: @bsg_fg; }
+
+/* ==========================================================================
+ * 6. Interruptor
+ * ========================================================================== */
+
+switch {
+  min-width: 46px;
+  min-height: 26px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background-color: @bsg_switch_off;
+  background-image: none;
+  box-shadow: inset 0 1px 2px alpha(#000000, 0.10);
+  transition: background-color 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+switch:checked {
+  background-color: @bsg_accent;
+  border-color: alpha(@bsg_accent_active, 0.5);
+  box-shadow: inset 0 1px 2px alpha(@bsg_accent_active, 0.22);
+}
+switch:disabled { background-color: alpha(@bsg_switch_off, 0.5); }
+switch slider {
+  min-width: 22px;
+  min-height: 22px;
+  margin: 1px;
+  border: none;
+  border-radius: 50%;
+  background-image: linear-gradient(to bottom, @bsg_knob_top, @bsg_knob_bottom);
+  box-shadow: 0 1px 3px alpha(#000000, 0.28), 0 0 0 1px alpha(#000000, 0.06);
+  transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+switch image { color: transparent; }
+
+/* ==========================================================================
+ * 7. Caixa e radio
+ * ========================================================================== */
+
+check, radio {
+  min-width: 15px;
+  min-height: 15px;
+  padding: 0;
+  margin: 2px;
+  border: 1px solid @bsg_entry_border;
+  border-radius: 4px;
+  background-image: linear-gradient(to bottom, @bsg_button_top, @bsg_button_bottom);
+  box-shadow: inset 0 1px alpha(#ffffff, 0.5), 0 1px 1px alpha(#000000, 0.05);
+  color: @bsg_accent_fg;
+  transition: all 130ms ease;
+  -gtk-icon-source: none;
+}
+radio { border-radius: 50%; }
+
+check:checked, check:indeterminate,
+radio:checked, radio:indeterminate {
+  background-image: linear-gradient(to bottom, @bsg_accent, @bsg_accent_hover);
+  border-color: @bsg_accent_active;
+  box-shadow: 0 1px 2px alpha(@bsg_accent_active, 0.30);
+}
+check:checked        { -gtk-icon-source: -gtk-icontheme("object-select-symbolic"); }
+check:indeterminate  { -gtk-icon-source: -gtk-icontheme("list-remove-symbolic"); }
+radio:checked        { -gtk-icon-source: -gtk-icontheme("radio-symbolic"); }
+radio:indeterminate  { -gtk-icon-source: -gtk-icontheme("list-remove-symbolic"); }
+
+check:disabled, radio:disabled { background-image: none; background-color: alpha(@bsg_trough, 0.5); border-color: @bsg_separator; color: @bsg_fg_disabled; }
+check:focus-visible, radio:focus-visible { outline: 2px solid alpha(@bsg_accent, 0.5); outline-offset: 2px; }
+
+/* dentro de listas e menus o fundo some */
+menuitem check, menuitem radio,
+modelbutton check, modelbutton radio {
+  background-image: none;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: @bsg_accent;
+}
+
+/* ==========================================================================
+ * 8. Deslizante
+ * ========================================================================== */
+
+scale { min-height: 14px; min-width: 14px; padding: 10px; }
+scale trough {
+  min-height: 4px;
+  min-width: 4px;
+  border: none;
+  border-radius: 3px;
+  background-color: @bsg_trough;
+  box-shadow: inset 0 1px 1px alpha(#000000, 0.10);
+}
+scale highlight {
+  min-height: 4px;
+  min-width: 4px;
+  border-radius: 3px;
+  background-image: linear-gradient(to right, @bsg_accent_active, @bsg_accent);
+}
+scale fill { border-radius: 3px; background-color: alpha(@bsg_accent, 0.28); }
+scale slider {
+  min-width: 18px;
+  min-height: 18px;
+  margin: -8px;
+  border: 1px solid alpha(#000000, 0.14);
+  border-radius: 50%;
+  background-image: linear-gradient(to bottom, @bsg_knob_top, @bsg_knob_bottom);
+  box-shadow: 0 1px 3px alpha(#000000, 0.24);
+  transition: all 130ms ease;
+}
+scale slider:hover { background-image: linear-gradient(to bottom, @bsg_knob_top, @bsg_knob_top); box-shadow: 0 2px 5px alpha(#000000, 0.30); }
+scale slider:disabled { background-image: none; background-color: @bsg_trough; box-shadow: none; }
+scale marks label { color: @bsg_fg_dim; font-size: 0.8em; }
+
+/* ==========================================================================
+ * 9. Barra de rolagem
+ *
+ * Fina e flutuante; engorda quando o ponteiro se aproxima.
+ * ========================================================================== */
+
+scrollbar {
+  background-color: transparent;
+  border: none;
+  transition: background-color 200ms ease;
+}
+scrollbar.overlay-indicator:not(.dragging):not(.hovering) { opacity: 0.55; }
+scrollbar slider {
+  min-width: 8px;
+  min-height: 8px;
+  margin: 3px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background-clip: padding-box;
+  background-color: @bsg_scroll;
+  transition: background-color 160ms ease, min-width 160ms ease, min-height 160ms ease;
+}
+scrollbar slider:hover { background-color: @bsg_scroll_hover; }
+scrollbar slider:active { background-color: @bsg_fg_dim; }
+scrollbar slider:disabled { background-color: transparent; }
+scrollbar:hover slider { min-width: 10px; min-height: 10px; }
+scrollbar button { min-width: 0; min-height: 0; padding: 0; border: none; background: none; color: transparent; }
+
+/* ==========================================================================
+ * 10. Popovers e menus
+ *
+ * Cantos bem arredondados e itens que viram pilula no hover.
+ * ========================================================================== */
+
+popover.background {
+  padding: 2px;
+  border: 1px solid @bsg_border;
+  border-radius: 12px;
+  background-color: @bsg_popover_bg;
+  box-shadow: 0 10px 30px @bsg_shadow, 0 2px 6px alpha(#000000, 0.14);
+  color: @bsg_fg;
+}
+popover.background > contents { padding: 4px; }
+popover.background separator { background-color: @bsg_separator; margin: 4px 2px; }
+
+modelbutton.flat,
+popover.background button.model {
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-image: none;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: @bsg_fg;
+}
+modelbutton.flat:hover { background-color: @bsg_accent; color: @bsg_accent_fg; }
+modelbutton.flat:disabled { color: @bsg_fg_disabled; background-color: transparent; }
+modelbutton.flat arrow { color: @bsg_fg_dim; }
+modelbutton.flat:hover arrow { color: @bsg_accent_fg; }
+
+menu, .menu, .context-menu {
+  padding: 4px;
+  border: 1px solid @bsg_border;
+  border-radius: 10px;
+  background-color: @bsg_popover_bg;
+  box-shadow: 0 10px 28px @bsg_shadow;
+  color: @bsg_fg;
+}
+menu menuitem, .menu menuitem {
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: @bsg_fg;
+  transition: background-color 100ms ease;
+}
+menu menuitem:hover, .menu menuitem:hover { background-color: @bsg_accent; color: @bsg_accent_fg; }
+menu menuitem:disabled { color: @bsg_fg_disabled; }
+menu separator, .menu separator { background-color: @bsg_separator; margin: 4px 2px; padding: 0; min-height: 1px; }
+menu arrow, .menu arrow { color: @bsg_fg_dim; }
+
+menubar {
+  background-color: transparent;
+  box-shadow: inset 0 -1px @bsg_separator;
+  padding: 0 2px;
+}
+menubar > menuitem { min-height: 22px; padding: 3px 9px; border-radius: 6px; }
+menubar > menuitem:hover { background-color: @bsg_accent; color: @bsg_accent_fg; }
+
+/* ==========================================================================
+ * 11. Barra lateral e listas
+ * ========================================================================== */
+
+.sidebar,
+placessidebar,
+stacksidebar,
+stacksidebar list {
+  background-color: @bsg_sidebar_bg;
+  color: @bsg_fg;
+  border: none;
+}
+.sidebar:dir(ltr), placessidebar:dir(ltr), stacksidebar:dir(ltr) { border-right: 1px solid @bsg_separator; }
+.sidebar:dir(rtl), placessidebar:dir(rtl), stacksidebar:dir(rtl) { border-left: 1px solid @bsg_separator; }
+
+.sidebar list row,
+placessidebar row,
+stacksidebar list row {
+  min-height: 30px;
+  margin: 1px 6px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  transition: background-color 120ms ease;
+}
+.sidebar list row:hover, placessidebar row:hover, stacksidebar list row:hover { background-color: alpha(@bsg_fg, 0.07); }
+.sidebar list row:selected,
+placessidebar row:selected,
+stacksidebar list row:selected {
+  background-color: @bsg_accent;
+  color: @bsg_accent_fg;
+  font-weight: 500;
+}
+.sidebar list row:selected image, placessidebar row:selected image { color: @bsg_accent_fg; }
+placessidebar row image.sidebar-icon { color: @bsg_fg_dim; }
+
+list { background-color: @bsg_view_bg; color: @bsg_view_fg; border-color: @bsg_separator; }
+list row { transition: background-color 120ms ease; }
+list row:selected { background-color: @bsg_accent; color: @bsg_accent_fg; }
+list.content-list row, list.boxed-list row { border-color: @bsg_separator; }
+list.content-list, list.boxed-list {
+  border: 1px solid @bsg_border;
+  border-radius: 10px;
+  background-color: @bsg_card_bg;
+}
+row.activatable:hover { background-color: alpha(@bsg_fg, 0.06); }
+row.activatable:active { background-color: alpha(@bsg_fg, 0.11); }
+
+/* ==========================================================================
+ * 12. Abas
+ *
+ * Desenhadas como o segmented control do macOS: a aba ativa e uma pastilha
+ * clara flutuando sobre o trilho.
+ * ========================================================================== */
+
+notebook > header {
+  background-color: @bsg_tabs_bg;
+  border-color: @bsg_separator;
+  padding: 0;
+}
+notebook > header.top { box-shadow: inset 0 -1px @bsg_separator; }
+notebook > header > tabs { margin: 0; }
+notebook > header > tabs > tab {
+  min-height: 28px;
+  min-width: 34px;
+  padding: 3px 15px;
+  margin: 4px 2px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: @bsg_fg_dim;
+  font-weight: 500;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+notebook > header > tabs > tab:hover { background-color: alpha(@bsg_fg, 0.07); color: @bsg_fg; }
+notebook > header > tabs > tab:checked {
+  background-color: @bsg_tab_active;
+  color: @bsg_fg;
+  box-shadow: 0 1px 2px alpha(#000000, 0.14), 0 0 0 1px alpha(#000000, 0.05);
+}
+notebook > header > tabs > tab button.flat { min-width: 16px; min-height: 16px; padding: 0; border-radius: 50%; }
+notebook > stack { background-color: @bsg_view_bg; }
+
+/* ==========================================================================
+ * 13. Barras de ferramentas, busca, acao
+ * ========================================================================== */
+
+toolbar, .toolbar {
+  padding: 4px;
+  background-color: transparent;
+  border-color: @bsg_separator;
+}
+searchbar > revealer > box,
+.search-bar {
+  padding: 6px;
+  background-color: @bsg_window_bg;
+  box-shadow: inset 0 -1px @bsg_separator;
+}
+actionbar > revealer > box {
+  padding: 6px;
+  background-color: @bsg_window_bg;
+  box-shadow: inset 0 1px @bsg_separator;
+}
+
+infobar { background-color: transparent; }
+infobar > revealer > box {
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 6px;
+  background-color: alpha(@bsg_accent, 0.16);
+  border: 1px solid alpha(@bsg_accent, 0.4);
+  color: @bsg_fg;
+}
+infobar.warning > revealer > box { background-color: alpha(@bsg_warning, 0.18); border-color: alpha(@bsg_warning, 0.45); }
+infobar.error > revealer > box { background-color: alpha(@bsg_error, 0.18); border-color: alpha(@bsg_error, 0.45); }
+
+/* ==========================================================================
+ * 14. Progresso, nivel, girador
+ * ========================================================================== */
+
+progressbar { color: @bsg_fg_dim; font-size: 0.85em; }
+progressbar trough {
+  min-height: 5px;
+  border: none;
+  border-radius: 3px;
+  background-color: @bsg_trough;
+}
+progressbar progress {
+  min-height: 5px;
+  border-radius: 3px;
+  background-image: linear-gradient(to right, @bsg_accent_active, @bsg_accent);
+}
+progressbar.osd trough { background-color: alpha(#000000, 0.2); }
+
+levelbar block.filled { background-color: @bsg_accent; border-radius: 3px; }
+levelbar block.high { background-color: @bsg_success; }
+levelbar block.low { background-color: @bsg_warning; }
+levelbar block.full { background-color: @bsg_success; }
+levelbar block.empty { background-color: @bsg_trough; border-radius: 3px; }
+levelbar trough { background-color: @bsg_trough; border: none; border-radius: 3px; padding: 0; }
+
+spinner { color: @bsg_accent; opacity: 1; }
+
+/* ==========================================================================
+ * 15. Arvore e colunas
+ * ========================================================================== */
+
+treeview.view {
+  background-color: @bsg_view_bg;
+  color: @bsg_view_fg;
+  border-left-color: @bsg_separator;
+  border-top-color: @bsg_separator;
+}
+treeview.view:selected { background-color: @bsg_accent; color: @bsg_accent_fg; }
+treeview.view:selected:backdrop { background-color: alpha(@bsg_accent, 0.6); }
+treeview.view:hover { background-color: alpha(@bsg_fg, 0.05); }
+treeview.view header button {
+  min-height: 26px;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid @bsg_separator;
+  box-shadow: inset 0 -1px @bsg_separator;
+  background-image: linear-gradient(to bottom, @bsg_headerbar_top, @bsg_headerbar_bottom);
+  color: @bsg_fg_dim;
+  font-weight: 500;
+}
+treeview.view header button:hover { background-image: linear-gradient(to bottom, @bsg_button_hover, @bsg_headerbar_bottom); color: @bsg_fg; }
+treeview.view:disabled { color: @bsg_fg_disabled; }
+treeview.view.expander { color: @bsg_fg_dim; }
+treeview.view.expander:checked { color: @bsg_fg; }
+
+column-header button { border-radius: 0; }
+
+/* ==========================================================================
+ * 16. Dica, OSD, sobreposicoes
+ * ========================================================================== */
+
+tooltip.background {
+  background-color: @bsg_tooltip_bg;
+  border: 1px solid alpha(#000000, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px alpha(#000000, 0.28);
+  color: @bsg_tooltip_fg;
+}
+tooltip label { padding: 3px 5px; color: @bsg_tooltip_fg; }
+
+.osd, popover.osd, .app-notification {
+  background-color: @bsg_osd_bg;
+  border: 1px solid alpha(#000000, 0.25);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px alpha(#000000, 0.35);
+  color: #F2F0F7;
+}
+.osd button { background-image: none; background-color: alpha(#ffffff, 0.12); border-color: transparent; color: #F2F0F7; box-shadow: none; }
+.osd button:hover { background-color: alpha(#ffffff, 0.20); }
+
+/* ==========================================================================
+ * 17. Dialogos
+ * ========================================================================== */
+
+messagedialog .titlebar { min-height: 32px; background-image: none; background-color: transparent; border: none; box-shadow: none; }
+messagedialog .dialog-action-area { padding: 6px; }
+messagedialog .dialog-action-area button { min-height: 28px; border-radius: 7px; margin: 3px; }
+messagedialog label.title { font-weight: 600; font-size: 1.12em; }
+
+filechooser .dialog-action-box { border-top: 1px solid @bsg_separator; }
+filechooser stack.view { background-color: @bsg_view_bg; }
+
+/* ==========================================================================
+ * 18. Miudezas
+ * ========================================================================== */
+
+separator { background-color: @bsg_separator; min-width: 1px; min-height: 1px; }
+paned > separator { background-color: @bsg_separator; min-width: 1px; min-height: 1px; }
+paned > separator:selected { background-color: @bsg_accent; }
+
+selection, ::selection { background-color: @bsg_accent; color: @bsg_accent_fg; }
+
+label { caret-color: @bsg_accent; }
+label:disabled { color: @bsg_fg_disabled; }
+label.dim-label { color: @bsg_fg_dim; }
+
+link, *:link { color: @bsg_accent_active; }
+*:visited { color: @bsg_indigo; }
+
+frame > border, .frame { border: 1px solid @bsg_border; border-radius: 8px; }
+
+scrolledwindow undershoot.top,
+scrolledwindow undershoot.bottom,
+scrolledwindow undershoot.left,
+scrolledwindow undershoot.right { background-image: none; }
+
+expander title > arrow { color: @bsg_fg_dim; min-width: 14px; min-height: 14px; }
+
+calendar { border: 1px solid @bsg_border; border-radius: 8px; padding: 2px; }
+calendar:selected { background-color: @bsg_accent; color: @bsg_accent_fg; border-radius: 5px; }
+calendar.header { border-bottom: 1px solid @bsg_separator; border-radius: 0; }
+calendar.button { color: @bsg_fg_dim; }
+
+/* Gedit, Nautilus e afins usam .background como raiz do conteudo */
+.background { background-color: @bsg_window_bg; color: @bsg_fg; }
+.view, iconview { background-color: @bsg_view_bg; color: @bsg_view_fg; }
+.view:selected, iconview:selected { background-color: @bsg_accent; color: @bsg_accent_fg; border-radius: 6px; }
+
+/* terminal: manter fundo do proprio app, so ajustar a selecao */
+vte-terminal { color: @bsg_view_fg; }

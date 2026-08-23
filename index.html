@@ -1,28 +1,271 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Big Sur Glow — tema para Windows e Linux</title>
-    <meta
-      name="description"
-      content="Tema de área de trabalho inspirado no macOS Big Sur, para Windows 10/11 e Linux. Instalador reversível, sem alterar arquivos de sistema."
-    />
-    <meta name="author" content="MarbleCeo" />
-    <meta name="theme-color" content="#9b87f5" />
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big Sur Glow — tema para Windows e Linux</title>
+<meta name="description" content="Tema de área de trabalho inspirado no macOS Big Sur, para Windows 10/11 e Linux. Instalador reversível, sem alterar arquivos de sistema.">
+<meta name="author" content="MarbleCeo">
+<meta name="theme-color" content="#9b87f5">
+<meta property="og:title" content="Big Sur Glow">
+<meta property="og:description" content="Tema de área de trabalho inspirado no macOS Big Sur, para Windows 10/11 e Linux.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/wallpaper-light.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%239b87f5'/></svg>">
 
-    <meta property="og:title" content="Big Sur Glow" />
-    <meta
-      property="og:description"
-      content="Tema de área de trabalho inspirado no macOS Big Sur, para Windows 10/11 e Linux."
-    />
-    <meta property="og:type" content="website" />
+<style>
+/* Página estática. Sem build, sem dependências: abra o arquivo e pronto.
+   A paleta espelha shared/palette.json — quando servida por http ela é lida
+   de lá; sob file:// cai nos valores embutidos abaixo. */
+:root{
+  --lavender:#D6BCFA; --iris:#9b87f5; --violet:#7E69AB; --indigo:#6E59A5;
+  --ink:#221F26; --slate:#403E43; --mist:#E5DEFF; --sky:#D3E4FD;
+  --glass:rgba(255,255,255,.25);
+  --edge:rgba(155,135,245,.30);
+  --radius:24px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; min-height:100vh; padding:64px 24px;
+  font-family:var(--sans); color:var(--ink); line-height:1.6;
+  background:linear-gradient(to top right,var(--lavender),var(--iris) 55%,var(--indigo));
+  background-attachment:fixed;
+}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:40px;}
 
-    <meta name="twitter:card" content="summary_large_image" />
-  </head>
+header{text-align:center;}
+h1{
+  margin:0; font-size:clamp(40px,7vw,60px); font-weight:700;
+  letter-spacing:-.02em; line-height:1.05;
+}
+header p{
+  max-width:34em; margin:16px auto 0; font-size:18px;
+  font-weight:500; color:var(--slate);
+}
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+.card{
+  background:var(--glass); border:1px solid var(--edge);
+  border-radius:var(--radius); padding:32px;
+  box-shadow:0 18px 40px -18px rgba(126,105,171,.55);
+  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+}
+.card h2{margin:0 0 20px; font-size:20px; font-weight:600;}
+.card h2 + .lede{margin:-14px 0 24px; font-size:14px; color:var(--slate);}
+
+/* ——— abas ——— */
+.tabs{display:flex; gap:4px; padding:4px; margin-bottom:16px;
+  background:rgba(34,31,38,.10); border-radius:12px; width:max-content;}
+.tab{
+  font:inherit; font-size:14px; font-weight:500; cursor:pointer;
+  padding:7px 18px; border:none; border-radius:9px; color:var(--slate);
+  background:transparent; transition:background .2s ease,color .2s ease;
+}
+.tab[aria-selected="true"]{background:rgba(255,255,255,.85); color:var(--ink);}
+.tab:focus-visible{outline:2px solid var(--indigo); outline-offset:2px;}
+
+.cmd{position:relative; background:rgba(34,31,38,.85); border-radius:18px;
+  padding:20px 96px 20px 20px; font-family:var(--mono); font-size:13.5px;
+  line-height:1.85; color:var(--mist); overflow-x:auto;}
+.cmd div{white-space:pre-wrap; word-break:break-all;}
+.cmd .p{user-select:none; color:var(--iris);}
+.copy{
+  position:absolute; top:12px; right:12px; font:inherit; font-size:12px;
+  font-weight:600; cursor:pointer; padding:6px 14px; border:none;
+  border-radius:8px; color:var(--mist); background:rgba(155,135,245,.25);
+  transition:background .2s ease;
+}
+.copy:hover{background:rgba(155,135,245,.45);}
+.copy:focus-visible{outline:2px solid var(--mist); outline-offset:2px;}
+.note{margin:12px 0 0; font-size:14px; color:var(--slate);}
+.note code{font-family:var(--mono); font-size:12.5px;
+  background:rgba(34,31,38,.10); padding:2px 6px; border-radius:5px;}
+[hidden]{display:none !important;}
+
+/* ——— paleta ——— */
+.swatches{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+.sw-chip{height:76px; border-radius:16px; border:1px solid rgba(255,255,255,.45);
+  box-shadow:0 6px 14px -6px rgba(34,31,38,.45);}
+.sw-name{margin-top:8px; font-size:14px; font-weight:600;}
+.sw-hex{font-family:var(--mono); font-size:12px; color:var(--slate);
+  text-transform:uppercase;}
+.sw-use{font-size:12px; color:var(--slate); opacity:.85;}
+
+/* ——— papéis de parede ——— */
+.walls{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.walls figure{margin:0;}
+.walls img{width:100%; aspect-ratio:16/10; object-fit:cover;
+  border-radius:16px; border:1px solid rgba(255,255,255,.45);
+  box-shadow:0 8px 18px -8px rgba(34,31,38,.5); display:block;}
+.walls figcaption{margin-top:8px; font-size:13px; font-weight:500;
+  color:var(--slate);}
+
+footer{padding-bottom:8px; text-align:center; font-size:14px; color:var(--slate);}
+footer a{color:inherit; font-weight:600; text-decoration:underline;
+  text-underline-offset:4px;}
+footer .fine{margin-top:12px; font-size:12px; opacity:.8;}
+.sep{margin:0 8px;}
+
+@media (max-width:720px){
+  body{padding:40px 16px;}
+  .card{padding:22px;}
+  .swatches{grid-template-columns:repeat(2,1fr);}
+  .walls{grid-template-columns:1fr;}
+  .cmd{padding:20px 16px 56px;}
+  .copy{top:auto; bottom:12px; right:12px;}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.001ms !important;}}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Big Sur Glow</h1>
+    <p>Tema de área de trabalho inspirado no macOS Big Sur, para Windows 10/11 e
+    Linux. Reversível — o instalador guarda o estado anterior antes de mudar
+    qualquer coisa.</p>
+  </header>
+
+  <section class="card">
+    <h2>Instalação</h2>
+    <div class="tabs" role="tablist" aria-label="Sistema operacional">
+      <button class="tab" role="tab" id="tab-win" aria-controls="panel-win" aria-selected="true">Windows</button>
+      <button class="tab" role="tab" id="tab-lin" aria-controls="panel-lin" aria-selected="false">Linux</button>
+    </div>
+
+    <div role="tabpanel" id="panel-win" aria-labelledby="tab-win">
+      <div class="cmd">
+        <button class="copy" type="button">Copiar</button>
+        <div><span class="p">$ </span>git clone https://github.com/MarbleLabs1/bigsur-windows-glow.git</div>
+        <div><span class="p">$ </span>cd bigsur-windows-glow\windows</div>
+        <div><span class="p">$ </span>.\install.ps1 -Dark</div>
+      </div>
+      <p class="note">Sem <code>-Dark</code> aplica a variante clara. Para
+      desfazer: <code>.\uninstall.ps1</code></p>
+    </div>
+
+    <div role="tabpanel" id="panel-lin" aria-labelledby="tab-lin" hidden>
+      <div class="cmd">
+        <button class="copy" type="button">Copiar</button>
+        <div><span class="p">$ </span>git clone https://github.com/MarbleLabs1/bigsur-windows-glow.git</div>
+        <div><span class="p">$ </span>cd bigsur-windows-glow/linux</div>
+        <div><span class="p">$ </span>./install.sh --dark</div>
+      </div>
+      <p class="note">GNOME, Cinnamon, MATE, XFCE e KDE. Para desfazer:
+      <code>./uninstall.sh</code></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>A paleta</h2>
+    <p class="lede">A mesma fonte que os instaladores usam:
+    <code style="font-family:var(--mono);font-size:12.5px">shared/palette.json</code></p>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section class="card">
+    <h2>Papéis de parede</h2>
+    <p class="lede">Gradientes gerados por código, incluídos no repositório.</p>
+    <div class="walls">
+      <figure>
+        <img src="assets/wallpaper-light.png" alt="Papel de parede claro: gradiente lavanda" loading="lazy">
+        <figcaption>Claro</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/wallpaper-dark.png" alt="Papel de parede escuro: gradiente índigo" loading="lazy">
+        <figcaption>Escuro</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <footer>
+    <a href="https://github.com/MarbleLabs1/bigsur-windows-glow">Repositório</a>
+    <span class="sep">·</span>
+    <a href="https://github.com/MarbleCeo/macos-theme-for-linux">macOS Theme for Linux</a>
+    <div class="fine">Não afiliado à Apple Inc. &quot;macOS&quot; e &quot;Big Sur&quot;
+    são marcas da Apple Inc.</div>
+  </footer>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ——— abas ——— */
+  const tabs = [...document.querySelectorAll(".tab")];
+  const show = id => {
+    tabs.forEach(t => {
+      const on = t.id === id;
+      t.setAttribute("aria-selected", String(on));
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+  };
+  tabs.forEach(t => {
+    t.addEventListener("click", () => show(t.id));
+    t.addEventListener("keydown", e => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      e.preventDefault();
+      const next = tabs[(tabs.indexOf(t) + 1) % tabs.length];
+      next.focus(); show(next.id);
+    });
+  });
+
+  /* ——— copiar comandos ——— */
+  document.querySelectorAll(".copy").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const text = [...btn.parentElement.querySelectorAll("div")]
+        .map(d => d.textContent.replace(/^\$\s/, "")).join("\n");
+      try { await navigator.clipboard.writeText(text); }
+      catch { return; }
+      btn.textContent = "Copiado";
+      setTimeout(() => { btn.textContent = "Copiar"; }, 1800);
+    });
+  });
+
+  /* ——— paleta ——— */
+  const USE = {
+    lavender: ["Lavender", "Destaque no modo escuro"],
+    iris:     ["Iris",     "Destaque no modo claro"],
+    violet:   ["Violet",   "Sombras e bordas"],
+    indigo:   ["Indigo",   "Topo do gradiente"],
+    ink:      ["Ink",      "Texto no modo claro"],
+    slate:    ["Slate",    "Texto secundário"],
+    mist:     ["Mist",     "Texto no modo escuro"],
+    sky:      ["Sky",      "Texto secundário no escuro"],
+  };
+  // valores embutidos para quando a página é aberta direto do disco (file://)
+  const FALLBACK = {
+    lavender:"#D6BCFA", iris:"#9b87f5", violet:"#7E69AB", indigo:"#6E59A5",
+    ink:"#221F26", slate:"#403E43", mist:"#E5DEFF", sky:"#D3E4FD",
+  };
+
+  const render = colors => {
+    document.getElementById("swatches").innerHTML =
+      Object.keys(USE).map(k => {
+        const [label, use] = USE[k];
+        const hex = colors[k] || FALLBACK[k];
+        return `<div>
+          <div class="sw-chip" style="background:${hex}"></div>
+          <div class="sw-name">${label}</div>
+          <div class="sw-hex">${hex}</div>
+          <div class="sw-use">${use}</div>
+        </div>`;
+      }).join("");
+  };
+
+  render(FALLBACK);
+  // servida por http, a página lê o JSON de verdade e não pode divergir dele
+  fetch("shared/palette.json")
+    .then(r => r.ok ? r.json() : null)
+    .then(j => { if (j && j.colors) render(j.colors); })
+    .catch(() => {});
+})();
+</script>
+</body>
 </html>

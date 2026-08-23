@@ -1,0 +1,121 @@
+/* Big Sur Glow — variante clara.
+ *
+ * Este arquivo define SOMENTE cores. O instalador o concatena com widgets.css
+ * para gerar o gtk.css final, de modo que os dois temas compartilham uma unica
+ * folha de regras. Os valores de acento vem de shared/palette.json.
+ *
+ * Autor: MarbleCeo
+ */
+
+/* ---- paleta do projeto ------------------------------------------------- */
+@define-color bsg_lavender  #D6BCFA;
+@define-color bsg_iris      #9b87f5;
+@define-color bsg_violet    #7E69AB;
+@define-color bsg_indigo    #6E59A5;
+@define-color bsg_ink       #221F26;
+@define-color bsg_slate     #403E43;
+@define-color bsg_mist      #E5DEFF;
+@define-color bsg_sky       #D3E4FD;
+
+/* ---- acento ------------------------------------------------------------ */
+@define-color bsg_accent         @bsg_iris;
+@define-color bsg_accent_hover   shade(@bsg_iris, 0.94);
+@define-color bsg_accent_active  @bsg_violet;
+@define-color bsg_accent_fg      #ffffff;
+
+/* ---- superficies ------------------------------------------------------- */
+/* No Big Sur claro a janela e um cinza quentissimo, quase branco, e o
+ * conteudo e branco puro. A diferenca entre os dois e o que da profundidade. */
+@define-color bsg_window_bg      #ECEBF0;
+@define-color bsg_view_bg        #FFFFFF;
+@define-color bsg_card_bg        #FFFFFF;
+@define-color bsg_sidebar_bg     #E6E4EC;
+@define-color bsg_popover_bg     #F7F6FA;
+@define-color bsg_tooltip_bg     rgba(48, 45, 56, 0.92);
+@define-color bsg_tooltip_fg     #F4F2F8;
+@define-color bsg_osd_bg         rgba(40, 38, 46, 0.86);
+
+/* ---- texto ------------------------------------------------------------- */
+@define-color bsg_fg             @bsg_ink;
+@define-color bsg_fg_dim         alpha(@bsg_ink, 0.62);
+@define-color bsg_fg_disabled    alpha(@bsg_ink, 0.34);
+@define-color bsg_view_fg        @bsg_ink;
+
+/* ---- linhas e bordas --------------------------------------------------- */
+@define-color bsg_border         rgba(34, 31, 38, 0.14);
+@define-color bsg_border_strong  rgba(34, 31, 38, 0.22);
+@define-color bsg_separator      rgba(34, 31, 38, 0.10);
+
+/* ---- barra de titulo --------------------------------------------------- */
+@define-color bsg_headerbar_top     #EDECF1;
+@define-color bsg_headerbar_bottom  #E1DFE8;
+@define-color bsg_headerbar_border  rgba(34, 31, 38, 0.18);
+@define-color bsg_headerbar_backdrop #EFEEF2;
+@define-color bsg_headerbar_gloss   rgba(255, 255, 255, 0.65);
+
+/* ---- botoes ------------------------------------------------------------ */
+@define-color bsg_button_top     #FFFFFF;
+@define-color bsg_button_bottom  #F3F2F6;
+@define-color bsg_button_hover   #FAF9FC;
+@define-color bsg_button_active  #E2E0E8;
+@define-color bsg_button_border  rgba(34, 31, 38, 0.18);
+@define-color bsg_button_gloss   rgba(255, 255, 255, 0.85);
+
+/* ---- campos, trilhos, barras ------------------------------------------- */
+@define-color bsg_entry_border   rgba(34, 31, 38, 0.20);
+@define-color bsg_trough         rgba(34, 31, 38, 0.14);
+@define-color bsg_switch_off     rgba(34, 31, 38, 0.16);
+@define-color bsg_scroll         rgba(34, 31, 38, 0.32);
+@define-color bsg_scroll_hover   rgba(34, 31, 38, 0.50);
+@define-color bsg_knob_top       #FFFFFF;
+@define-color bsg_knob_bottom    #F1F0F4;
+
+/* ---- abas -------------------------------------------------------------- */
+@define-color bsg_tabs_bg        #E4E2EA;
+@define-color bsg_tab_active     #FFFFFF;
+
+/* ---- estados ----------------------------------------------------------- */
+@define-color bsg_success  #2FA84F;
+@define-color bsg_warning  #E0A106;
+@define-color bsg_error    #E14C42;
+
+/* ---- semaforo ---------------------------------------------------------- */
+@define-color bsg_tl_close     #FF5F57;
+@define-color bsg_tl_minimize  #FEBC2E;
+@define-color bsg_tl_maximize  #28C840;
+@define-color bsg_tl_backdrop  rgba(34, 31, 38, 0.16);
+@define-color bsg_tl_glyph     rgba(34, 31, 38, 0.58);
+
+/* ---- sombra de janela -------------------------------------------------- */
+@define-color bsg_shadow          rgba(0, 0, 0, 0.30);
+@define-color bsg_shadow_backdrop rgba(0, 0, 0, 0.16);
+
+/* ---- nomes padrao do GTK ------------------------------------------------
+ * Aplicativos antigos leem estes nomes diretamente; sem eles o tema quebra
+ * em GIMP, Inkscape e afins. */
+@define-color theme_bg_color            @bsg_window_bg;
+@define-color theme_fg_color            @bsg_fg;
+@define-color theme_base_color          @bsg_view_bg;
+@define-color theme_text_color          @bsg_view_fg;
+@define-color theme_selected_bg_color   @bsg_accent;
+@define-color theme_selected_fg_color   @bsg_accent_fg;
+@define-color insensitive_bg_color      @bsg_window_bg;
+@define-color insensitive_fg_color      @bsg_fg_disabled;
+@define-color insensitive_base_color    @bsg_view_bg;
+@define-color theme_unfocused_bg_color  @bsg_window_bg;
+@define-color theme_unfocused_fg_color  @bsg_fg_dim;
+@define-color theme_unfocused_base_color @bsg_view_bg;
+@define-color theme_unfocused_text_color @bsg_view_fg;
+@define-color theme_unfocused_selected_bg_color alpha(@bsg_accent, 0.72);
+@define-color theme_unfocused_selected_fg_color @bsg_accent_fg;
+@define-color borders                   @bsg_border;
+@define-color unfocused_borders         @bsg_separator;
+@define-color warning_color             @bsg_warning;
+@define-color error_color               @bsg_error;
+@define-color success_color             @bsg_success;
+@define-color link_color                @bsg_accent_active;
+@define-color visited_link_color        @bsg_indigo;
+@define-color content_view_bg           @bsg_view_bg;
+@define-color wm_bg                     @bsg_headerbar_top;
+@define-color wm_title                  @bsg_fg;
+@define-color wm_unfocused_title        @bsg_fg_dim;

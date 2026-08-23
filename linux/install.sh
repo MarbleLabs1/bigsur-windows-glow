@@ -2,10 +2,14 @@
 #
 # Big Sur Glow - tema para Linux
 #
-# Aplica a variante clara ou escura no ambiente de trabalho do usuario atual.
-# Nao precisa de root e nao toca em nada fora do seu $HOME. Tudo o que e
-# alterado e salvo antes em ~/.config/bigsur-theme/backup.env, e o
-# uninstall.sh devolve como estava.
+# Monta e aplica o tema GTK 3 e GTK 4 na conta do usuario atual. Nao precisa
+# de root e nao toca em nada fora do seu $HOME. Tudo o que e alterado fica
+# salvo antes em ~/.config/bigsur-theme/backup.env, e o uninstall.sh devolve
+# como estava.
+#
+# O tema e montado na hora: as cores da variante escolhida sao concatenadas
+# com a folha de widgets, de modo que claro e escuro compartilham uma unica
+# regra de estilo. Fonte das cores: shared/palette.json.
 #
 # Ambientes suportados: GNOME, Cinnamon, MATE, XFCE, KDE Plasma.
 #
@@ -16,9 +20,13 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/bigsur-theme"
 BACKUP="$STATE_DIR/backup.env"
+THEME_DIR="$HOME/.themes"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 VARIANT="light"
 SET_WALLPAPER=1
+SET_GTK4=1
+BUTTONS_LEFT=1
 
 # ------------------------------------------------------------------ saida --- #
 
@@ -34,6 +42,10 @@ Uso: ./install.sh [opcoes]
   --dark           aplica a variante escura (padrao: clara)
   --light          aplica a variante clara
   --no-wallpaper   mantem o papel de parede atual
+  --no-gtk4        nao mexe em ~/.config/gtk-4.0 (deixa apps libadwaita
+                   com a aparencia padrao)
+  --buttons-right  mantem os botoes da janela a direita, no lugar do
+                   semaforo a esquerda
   -h, --help       mostra esta ajuda
 
 Exemplos:
@@ -45,14 +57,21 @@ EOF
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --dark)         VARIANT="dark" ;;
-        --light)        VARIANT="light" ;;
-        --no-wallpaper) SET_WALLPAPER=0 ;;
-        -h|--help)      usage; exit 0 ;;
-        *)              c_die "opcao desconhecida: $1 (use --help)" ;;
+        --dark)          VARIANT="dark" ;;
+        --light)         VARIANT="light" ;;
+        --no-wallpaper)  SET_WALLPAPER=0 ;;
+        --no-gtk4)       SET_GTK4=0 ;;
+        --buttons-right) BUTTONS_LEFT=0 ;;
+        -h|--help)       usage; exit 0 ;;
+        *)               c_die "opcao desconhecida: $1 (use --help)" ;;
     esac
     shift
 done
+
+case "$VARIANT" in
+    light) THEME_NAME="BigSur-Glow-Light" ;;
+    dark)  THEME_NAME="BigSur-Glow-Dark" ;;
+esac
 
 # ----------------------------------------------------------- ambiente ------- #
 
@@ -75,7 +94,14 @@ printf '  \033[90mvariante: %s | ambiente: %s\033[0m\n\n' "$VARIANT" "$DE"
 
 [ "$DE" = "desconhecido" ] && c_warn "ambiente nao reconhecido; vou tentar o caminho do GNOME"
 
+COLORS="$REPO_ROOT/gtk/colors-$VARIANT.css"
+GTK3_SRC="$REPO_ROOT/gtk/widgets-gtk3.css"
+GTK4_SRC="$REPO_ROOT/gtk/widgets-gtk4.css"
 WALLPAPER="$REPO_ROOT/assets/wallpaper-$VARIANT.png"
+
+for f in "$COLORS" "$GTK3_SRC" "$GTK4_SRC"; do
+    [ -f "$f" ] || c_die "arquivo do tema nao encontrado: $f"
+done
 [ -f "$WALLPAPER" ] || c_die "papel de parede nao encontrado: $WALLPAPER"
 
 # ------------------------------------------------------------- backup ------- #
@@ -101,19 +127,128 @@ save_backup() {
                 echo "BIGSUR_WALLPAPER_DARK=$(gsettings get "$schema" picture-uri-dark 2>/dev/null || echo "''")"
                 echo "BIGSUR_GTK_THEME=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null || echo "''")"
                 echo "BIGSUR_COLOR_SCHEME=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo "''")"
+                echo "BIGSUR_BUTTON_LAYOUT=$(gsettings get org.gnome.desktop.wm.preferences button-layout 2>/dev/null || echo "''")"
                 ;;
             xfce)
                 echo "BIGSUR_GTK_THEME='$(xfconf-query -c xsettings -p /Net/ThemeName 2>/dev/null || true)'"
+                echo "BIGSUR_BUTTON_LAYOUT='$(xfconf-query -c xfwm4 -p /general/button_layout 2>/dev/null || true)'"
                 ;;
             kde)
                 echo "# KDE: o Plasma guarda o proprio historico de papel de parede"
+                echo "BIGSUR_GTK_THEME=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null || echo "''")"
                 ;;
         esac
+        # o gtk.css do usuario e sobrescrito pelo tema GTK 4; guardar o antigo
+        if [ -f "$CONFIG_DIR/gtk-4.0/gtk.css" ]; then
+            cp "$CONFIG_DIR/gtk-4.0/gtk.css" "$STATE_DIR/gtk4-user.css.bak"
+            echo "BIGSUR_GTK4_USER_CSS='1'"
+        else
+            echo "BIGSUR_GTK4_USER_CSS='0'"
+        fi
     } > "$BACKUP"
     c_ok "backup em $BACKUP"
 }
 
 save_backup
+
+# --------------------------------------------------------- montar o tema ---- #
+#
+# O gtk.css final e a concatenacao de dois arquivos: o bloco @define-color da
+# variante e a folha de widgets. Nenhum passo de build, nenhuma duplicacao.
+
+build_theme() {
+    local dest="$THEME_DIR/$THEME_NAME"
+
+    rm -rf "$dest"
+    mkdir -p "$dest/gtk-3.0" "$dest/gtk-4.0"
+
+    {
+        printf '/* Big Sur Glow (%s) - gerado por linux/install.sh em %s.\n' "$VARIANT" "$(date -Is)"
+        printf '   Nao edite este arquivo: edite gtk/colors-%s.css ou gtk/widgets-gtk3.css. */\n\n' "$VARIANT"
+        cat "$COLORS"
+        printf '\n'
+        cat "$GTK3_SRC"
+    } > "$dest/gtk-3.0/gtk.css"
+
+    {
+        printf '/* Big Sur Glow (%s) - gerado por linux/install.sh em %s. */\n\n' "$VARIANT" "$(date -Is)"
+        cat "$COLORS"
+        printf '\n'
+        cat "$GTK4_SRC"
+    } > "$dest/gtk-4.0/gtk.css"
+
+    # o GTK 3 procura gtk-dark.css quando o app pede a variante escura
+    [ "$VARIANT" = "dark" ] && cp "$dest/gtk-3.0/gtk.css" "$dest/gtk-3.0/gtk-dark.css"
+
+    local buttons="close,minimize,maximize:"
+    [ "$BUTTONS_LEFT" -eq 0 ] && buttons=":minimize,maximize,close"
+
+    cat > "$dest/index.theme" <<THEME
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=$THEME_NAME
+Comment=Big Sur Glow - variante $VARIANT
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=$THEME_NAME
+MetacityTheme=$THEME_NAME
+ButtonLayout=$buttons
+THEME
+
+    c_ok "tema montado em $dest"
+}
+
+c_step "montando o tema GTK"
+build_theme
+
+# ------------------------------------------------------ aplicar o tema ------ #
+
+apply_gtk_theme() {
+    case "$DE" in
+        xfce)
+            xfconf-query -c xsettings -p /Net/ThemeName -s "$THEME_NAME"
+            ;;
+        *)
+            gsettings set org.gnome.desktop.interface gtk-theme "$THEME_NAME" 2>/dev/null || \
+                c_warn "nao consegui setar gtk-theme via gsettings"
+            ;;
+    esac
+    # apps GTK 2 antigos leem o ~/.gtkrc-2.0
+    printf 'gtk-theme-name="%s"\n' "$THEME_NAME" > "$HOME/.gtkrc-2.0.bigsur"
+    c_ok "tema GTK 3: $THEME_NAME"
+}
+
+c_step "aplicando o tema"
+apply_gtk_theme
+
+# O libadwaita ignora ~/.themes por completo: a unica porta de entrada e o
+# gtk.css do usuario. Por isso copiamos a folha para la.
+if [ "$SET_GTK4" -eq 1 ]; then
+    c_step "aplicando a folha GTK 4 (libadwaita)"
+    mkdir -p "$CONFIG_DIR/gtk-4.0"
+    cp "$THEME_DIR/$THEME_NAME/gtk-4.0/gtk.css" "$CONFIG_DIR/gtk-4.0/gtk.css"
+    c_ok "$CONFIG_DIR/gtk-4.0/gtk.css"
+    c_warn "apps GTK 4 ja abertos precisam ser reiniciados"
+fi
+
+# --------------------------------------------------------- semaforo --------- #
+
+if [ "$BUTTONS_LEFT" -eq 1 ]; then
+    c_step "movendo os botoes da janela para a esquerda"
+    case "$DE" in
+        gnome|cinnamon|mate|desconhecido)
+            gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:' 2>/dev/null || true
+            ;;
+        xfce)
+            xfconf-query -c xfwm4 -p /general/button_layout -s "CMH|" 2>/dev/null || true
+            ;;
+        kde)
+            c_warn "no KDE, mova os botoes em Configuracoes > Decoracao de Janelas"
+            ;;
+    esac
+    c_ok "semaforo a esquerda"
+fi
 
 # --------------------------------------------------------- papel de parede -- #
 
@@ -134,7 +269,6 @@ apply_wallpaper() {
             gsettings set org.mate.background picture-options 'zoom'
             ;;
         xfce)
-            # aplica em todos os monitores e areas de trabalho
             xfconf-query -c xfce4-desktop -l 2>/dev/null \
                 | grep -E 'last-image$' \
                 | while read -r prop; do
@@ -185,32 +319,8 @@ apply_color_scheme() {
 c_step "aplicando modo $VARIANT"
 apply_color_scheme
 
-# ----------------------------------------------------------- tema GTK ------- #
-
-find_whitesur() {
-    local suffix="Light"
-    [ "$VARIANT" = "dark" ] && suffix="Dark"
-    local dir
-    for dir in "$HOME/.themes" "$HOME/.local/share/themes" /usr/share/themes; do
-        [ -d "$dir" ] || continue
-        local hit
-        hit="$(find "$dir" -maxdepth 1 -type d -name "WhiteSur-$suffix*" -printf '%f\n' 2>/dev/null | head -n1)"
-        [ -n "$hit" ] && { echo "$hit"; return 0; }
-    done
-    return 1
-}
-
-c_step "procurando o tema GTK WhiteSur"
-if theme="$(find_whitesur)"; then
-    case "$DE" in
-        xfce) xfconf-query -c xsettings -p /Net/ThemeName -s "$theme" ;;
-        *)    gsettings set org.gnome.desktop.interface gtk-theme "$theme" 2>/dev/null || true ;;
-    esac
-    c_ok "tema GTK: $theme"
-else
-    c_warn "WhiteSur nao esta instalado - as cores foram aplicadas, mas sem os widgets do macOS"
-    c_warn "instale o pacote completo com: https://github.com/MarbleCeo/macos-theme-for-linux"
-fi
+# ---------------------------------------------------------------- fim ------- #
 
 printf '\n  \033[32mTema aplicado.\033[0m\n'
+printf '  \033[90mIcones e cursores nao fazem parte deste tema - veja docs/optional-tools.md\033[0m\n'
 printf '  \033[90mPara voltar ao que era antes:  ./uninstall.sh\033[0m\n\n'
