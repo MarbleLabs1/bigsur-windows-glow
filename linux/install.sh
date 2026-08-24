@@ -99,7 +99,9 @@ GTK3_SRC="$REPO_ROOT/gtk/widgets-gtk3.css"
 GTK4_SRC="$REPO_ROOT/gtk/widgets-gtk4.css"
 WALLPAPER="$REPO_ROOT/assets/wallpaper-$VARIANT.png"
 
-for f in "$COLORS" "$GTK3_SRC" "$GTK4_SRC"; do
+GTK2_SRC="$REPO_ROOT/gtk/gtk2-$VARIANT.rc"
+
+for f in "$COLORS" "$GTK3_SRC" "$GTK4_SRC" "$GTK2_SRC"; do
     [ -f "$f" ] || c_die "arquivo do tema nao encontrado: $f"
 done
 [ -f "$WALLPAPER" ] || c_die "papel de parede nao encontrado: $WALLPAPER"
@@ -180,6 +182,11 @@ build_theme() {
     # o GTK 3 procura gtk-dark.css quando o app pede a variante escura
     [ "$VARIANT" = "dark" ] && cp "$dest/gtk-3.0/gtk.css" "$dest/gtk-3.0/gtk-dark.css"
 
+    # GTK 2 e outra linguagem: rc por estados, sem @define-color. Sem isto,
+    # GIMP e Inkscape ficam com o tema padrao no meio do resto.
+    mkdir -p "$dest/gtk-2.0"
+    cp "$REPO_ROOT/gtk/gtk2-$VARIANT.rc" "$dest/gtk-2.0/gtkrc"
+
     local buttons="close,minimize,maximize:"
     [ "$BUTTONS_LEFT" -eq 0 ] && buttons=":minimize,maximize,close"
 
@@ -192,7 +199,6 @@ Encoding=UTF-8
 
 [X-GNOME-Metatheme]
 GtkTheme=$THEME_NAME
-MetacityTheme=$THEME_NAME
 ButtonLayout=$buttons
 THEME
 
@@ -214,8 +220,6 @@ apply_gtk_theme() {
                 c_warn "nao consegui setar gtk-theme via gsettings"
             ;;
     esac
-    # apps GTK 2 antigos leem o ~/.gtkrc-2.0
-    printf 'gtk-theme-name="%s"\n' "$THEME_NAME" > "$HOME/.gtkrc-2.0.bigsur"
     c_ok "tema GTK 3: $THEME_NAME"
 }
 

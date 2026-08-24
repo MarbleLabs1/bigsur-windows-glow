@@ -21,6 +21,7 @@ WhiteSur nem de nenhum outro tema de terceiros:
 
 - **GTK 3 e GTK 4/libadwaita**, claro e escuro, montados a partir da mesma
   folha de regras
+- **GTK 2** por cores, para GIMP e Inkscape nao destoarem do resto
 - **Semaforo**: os tres circulos coloridos a esquerda da barra de titulo, com
   os glifos aparecendo so quando o ponteiro entra na barra
 - Cantos de janela arredondados e sombra difusa
@@ -41,10 +42,24 @@ Este instalador altera **somente configuracoes de aparencia da sua conta de
 usuario**. Ele nao pede administrador, nao baixa nada da internet e nao toca em
 arquivo de sistema.
 
-**Icones e cursores nao fazem parte deste tema.** Sao milhares de SVGs e um
-pipeline de xcursor — trabalho de outra ordem de grandeza, e ha conjuntos
-prontos e bons. Dock e pacotes de icones estao listados em
-[docs/optional-tools.md](docs/optional-tools.md).
+### Ate onde vai, honestamente
+
+Isto e um **tema de widget**, nao um tema de macOS completo. As janelas e os
+controles ficam com cara de Big Sur; o resto da area de trabalho, nao. O que
+falta, em ordem de quanto se nota:
+
+| Peca | Estado | Por que importa |
+|---|---|---|
+| Widgets GTK 2, 3 e 4 | **pronto** | janelas, botoes, menus, listas |
+| Tema do GNOME Shell | falta | painel superior, overview, notificacoes — metade do que se ve no GNOME |
+| Tema de icones | falta | milhares de SVGs; sem ele os apps continuam com o icone padrao |
+| Cursores | falta | precisa de pipeline de xcursor |
+| Decoracao pelo servidor (metacity/xfwm) | falta | apps sem CSD ficam com a barra padrao |
+| Qt / Kvantum | falta | apps KDE destoam |
+| Dock, GDM, Firefox | falta | ver [docs/optional-tools.md](docs/optional-tools.md) |
+
+Quem compara com o [WhiteSur](https://github.com/vinceliuice/WhiteSur-gtk-theme)
+vai sentir a diferenca, e a diferenca e essa lista.
 
 **No Windows nao ha tema de janela.** A aparencia das bordas vem de um arquivo
 `.msstyles`, que e recurso binario compilado — nao da para escrever em texto, e
@@ -199,7 +214,9 @@ bigsur-windows-glow/
 │   ├── colors-light.css    #   so @define-color, variante clara
 │   ├── colors-dark.css     #   so @define-color, variante escura
 │   ├── widgets-gtk3.css    #   191 regras, nenhuma cor literal
-│   └── widgets-gtk4.css    #   84 regras + cores nomeadas do libadwaita
+│   ├── widgets-gtk4.css    #   84 regras + cores nomeadas do libadwaita
+│   ├── gtk2-light.rc       #   GTK 2 e outra linguagem: rc por estados
+│   └── gtk2-dark.rc
 ├── shared/palette.json     # paleta compartilhada pelos dois sistemas
 ├── assets/                 # papeis de parede (gradientes gerados por codigo)
 ├── windows/

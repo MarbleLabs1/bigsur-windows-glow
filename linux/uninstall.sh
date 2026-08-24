@@ -91,7 +91,7 @@ for name in BigSur-Glow-Light BigSur-Glow-Dark; do
     fi
 done
 [ "$removed" -eq 0 ] && c_warn "nenhum tema encontrado em $THEME_DIR"
-rm -f "$HOME/.gtkrc-2.0.bigsur"
+# (o tema GTK2 vive dentro de ~/.themes e sai junto com a pasta)
 
 # ------------------------------------------------------------- estado ------- #
 
