@@ -17,7 +17,19 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Sob `curl ... | bash` o script chega pela entrada padrao: BASH_SOURCE fica
+# vazio e, com set -u, isso aborta. O :- cobre esse caso; a busca da arvore
+# vem logo abaixo.
+SELF="${BASH_SOURCE[0]:-${0:-}}"
+if [ -n "$SELF" ] && [ -f "$SELF" ]; then
+    REPO_ROOT="$(cd "$(dirname "$SELF")/.." && pwd)"
+else
+    REPO_ROOT=""
+fi
+
+TARBALL="https://codeload.github.com/MarbleLabs1/bigsur-windows-glow/tar.gz/refs/heads/main"
+BOOTSTRAP_DIR=""
+
 STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/bigsur-theme"
 BACKUP="$STATE_DIR/backup.env"
 THEME_DIR="$HOME/.themes"
@@ -34,6 +46,22 @@ c_step()  { printf '  \033[36m->\033[0m %s\n' "$1"; }
 c_ok()    { printf '  \033[32mOK\033[0m %s\n' "$1"; }
 c_warn()  { printf '  \033[33m! \033[0m %s\n' "$1"; }
 c_die()   { printf '  \033[31mERRO\033[0m %s\n' "$1" >&2; exit 1; }
+
+# gsettings pode nao existir (sistema minimo, DE sem glib) ou recusar a chave.
+# Sem este envelope, o set -e derruba a instalacao no meio e deixa o tema
+# meio aplicado -- pior que nao aplicar.
+APPLIED=0   # quantos ajustes de area de trabalho realmente pegaram
+
+gset() {
+    command -v gsettings >/dev/null 2>&1 || { c_warn "gsettings ausente; pulei: $*"; return 0; }
+    if gsettings "$@" 2>/dev/null; then APPLIED=$((APPLIED + 1)); else c_warn "gsettings recusou: $*"; fi
+    return 0
+}
+xfconf() {
+    command -v xfconf-query >/dev/null 2>&1 || { c_warn "xfconf-query ausente; pulei"; return 0; }
+    if xfconf-query "$@" 2>/dev/null; then APPLIED=$((APPLIED + 1)); else c_warn "xfconf-query recusou: $*"; fi
+    return 0
+}
 
 usage() {
     cat <<'EOF'
@@ -93,6 +121,43 @@ printf '\n  \033[35mBig Sur Glow - tema para Linux\033[0m\n'
 printf '  \033[90mvariante: %s | ambiente: %s\033[0m\n\n' "$VARIANT" "$DE"
 
 [ "$DE" = "desconhecido" ] && c_warn "ambiente nao reconhecido; vou tentar o caminho do GNOME"
+
+# ------------------------------------------------------- arvore do tema ----- #
+#
+# O tema nao cabe num script: sao seis arquivos em gtk/ mais os papeis de
+# parede. Quando o install.sh roda dentro do repositorio clonado, eles estao
+# ao lado. Quando roda via `curl | bash`, nao ha arvore nenhuma -- entao ele
+# baixa o tarball do proprio repositorio e trabalha de la.
+
+need_tree() { [ -z "$REPO_ROOT" ] || [ ! -f "$REPO_ROOT/gtk/colors-light.css" ]; }
+
+fetch_tree() {
+    local dl
+    if command -v curl >/dev/null 2>&1; then dl="curl -fsSL"
+    elif command -v wget >/dev/null 2>&1; then dl="wget -qO-"
+    else c_die "preciso de curl ou wget para baixar o tema"; fi
+    command -v tar >/dev/null 2>&1 || c_die "preciso de tar para extrair o tema"
+
+    c_step "sem arvore local; baixando o tema do GitHub"
+    BOOTSTRAP_DIR="$(mktemp -d)"
+    trap 'rm -rf "$BOOTSTRAP_DIR"' EXIT
+
+    # Baixa para arquivo antes de extrair: assim um 404 vira uma mensagem
+    # nossa em vez de um despejo de erro do gzip e do tar.
+    local tgz="$BOOTSTRAP_DIR/tema.tar.gz"
+    if ! $dl "$TARBALL" > "$tgz" 2>/dev/null || [ ! -s "$tgz" ]; then
+        c_die "nao consegui baixar o tema. Se o repositorio for privado, clone com git em vez de usar curl."
+    fi
+    if ! tar xzf "$tgz" -C "$BOOTSTRAP_DIR" --strip-components=1 2>/dev/null; then
+        c_die "o arquivo baixado nao e um tarball valido"
+    fi
+    rm -f "$tgz"
+    REPO_ROOT="$BOOTSTRAP_DIR"
+    [ -f "$REPO_ROOT/gtk/colors-light.css" ] || c_die "o tarball nao trouxe gtk/ - repositorio errado?"
+    c_ok "tema baixado"
+}
+
+need_tree && fetch_tree
 
 COLORS="$REPO_ROOT/gtk/colors-$VARIANT.css"
 GTK3_SRC="$REPO_ROOT/gtk/widgets-gtk3.css"
@@ -213,10 +278,10 @@ build_theme
 apply_gtk_theme() {
     case "$DE" in
         xfce)
-            xfconf-query -c xsettings -p /Net/ThemeName -s "$THEME_NAME"
+            xfconf -c xsettings -p /Net/ThemeName -s "$THEME_NAME"
             ;;
         *)
-            gsettings set org.gnome.desktop.interface gtk-theme "$THEME_NAME" 2>/dev/null || \
+            gset set org.gnome.desktop.interface gtk-theme "$THEME_NAME" 2>/dev/null || \
                 c_warn "nao consegui setar gtk-theme via gsettings"
             ;;
     esac
@@ -242,10 +307,10 @@ if [ "$BUTTONS_LEFT" -eq 1 ]; then
     c_step "movendo os botoes da janela para a esquerda"
     case "$DE" in
         gnome|cinnamon|mate|desconhecido)
-            gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:' 2>/dev/null || true
+            gset set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
             ;;
         xfce)
-            xfconf-query -c xfwm4 -p /general/button_layout -s "CMH|" 2>/dev/null || true
+            xfconf -c xfwm4 -p /general/button_layout -s "CMH|"
             ;;
         kde)
             c_warn "no KDE, mova os botoes em Configuracoes > Decoracao de Janelas"
@@ -260,23 +325,23 @@ apply_wallpaper() {
     local uri="file://$WALLPAPER"
     case "$DE" in
         gnome)
-            gsettings set org.gnome.desktop.background picture-uri "$uri"
-            gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
-            gsettings set org.gnome.desktop.background picture-options 'zoom'
+            gset set org.gnome.desktop.background picture-uri "$uri"
+            gset set org.gnome.desktop.background picture-uri-dark "$uri"
+            gset set org.gnome.desktop.background picture-options 'zoom'
             ;;
         cinnamon)
-            gsettings set org.cinnamon.desktop.background picture-uri "$uri"
-            gsettings set org.cinnamon.desktop.background picture-options 'zoom'
+            gset set org.cinnamon.desktop.background picture-uri "$uri"
+            gset set org.cinnamon.desktop.background picture-options 'zoom'
             ;;
         mate)
-            gsettings set org.mate.background picture-filename "$WALLPAPER"
-            gsettings set org.mate.background picture-options 'zoom'
+            gset set org.mate.background picture-filename "$WALLPAPER"
+            gset set org.mate.background picture-options 'zoom'
             ;;
         xfce)
-            xfconf-query -c xfce4-desktop -l 2>/dev/null \
+            xfconf -c xfce4-desktop -l 2>/dev/null \
                 | grep -E 'last-image$' \
                 | while read -r prop; do
-                    xfconf-query -c xfce4-desktop -p "$prop" -s "$WALLPAPER"
+                    xfconf -c xfce4-desktop -p "$prop" -s "$WALLPAPER"
                   done
             ;;
         kde)
@@ -288,7 +353,7 @@ apply_wallpaper() {
             fi
             ;;
         *)
-            gsettings set org.gnome.desktop.background picture-uri "$uri" 2>/dev/null \
+            gset set org.gnome.desktop.background picture-uri "$uri" 2>/dev/null \
                 || { c_warn "nao consegui aplicar o papel de parede neste ambiente"; return; }
             ;;
     esac
@@ -307,7 +372,7 @@ apply_color_scheme() {
     [ "$VARIANT" = "dark" ] && pref="prefer-dark"
     case "$DE" in
         gnome|cinnamon|mate|desconhecido)
-            gsettings set org.gnome.desktop.interface color-scheme "$pref" 2>/dev/null || true
+            gset set org.gnome.desktop.interface color-scheme "$pref"
             ;;
         kde)
             if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
@@ -324,6 +389,20 @@ c_step "aplicando modo $VARIANT"
 apply_color_scheme
 
 # ---------------------------------------------------------------- fim ------- #
+
+if [ "$APPLIED" -eq 0 ]; then
+    printf '
+  [33mTema montado, mas nao aplicado.[0m
+'
+    printf '  [90mNenhum ajuste pegou: gsettings e xfconf-query nao responderam.[0m
+'
+    printf '  [90mO tema esta em ~/.themes/%s - selecione a mao no ajustador[0m
+' "$THEME_NAME"
+    printf '  [90mde aparencia do seu ambiente.[0m
+
+'
+    exit 0
+fi
 
 printf '\n  \033[32mTema aplicado.\033[0m\n'
 printf '  \033[90mIcones e cursores nao fazem parte deste tema - veja docs/optional-tools.md\033[0m\n'

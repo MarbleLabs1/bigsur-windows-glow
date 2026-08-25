@@ -39,8 +39,9 @@ destaque, transparencia, papel de parede e barra de tarefas.
 ## O que ele **nao** faz
 
 Este instalador altera **somente configuracoes de aparencia da sua conta de
-usuario**. Ele nao pede administrador, nao baixa nada da internet e nao toca em
-arquivo de sistema.
+usuario**. Ele nao pede administrador e nao toca em arquivo de sistema. So
+acessa a rede num caso: quando voce o roda via `curl | bash` e ele precisa
+baixar o proprio tema, que nao cabe num script.
 
 ### Ate onde vai, honestamente
 
@@ -105,6 +106,16 @@ git clone https://github.com/MarbleLabs1/bigsur-windows-glow.git
 cd bigsur-windows-glow/linux
 ./install.sh
 ```
+
+Ou direto, sem clonar — **so funciona com o repositorio publico**:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MarbleLabs1/bigsur-windows-glow/main/linux/install.sh | bash -s -- --dark
+```
+
+Neste caminho o script nao tem a arvore ao lado, entao **baixa o tarball do
+repositorio** para uma pasta temporaria e trabalha de la, apagando no fim. E a
+unica situacao em que ele acessa a rede.
 
 Opcoes:
 
